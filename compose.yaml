@@ -44,8 +44,8 @@ services:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: "Docker Registry"
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
-      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/privkey.pem
       REGISTRY_LOG_LEVEL: info
       REGISTRY_LOG_FORMATTER: json
       REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "true"

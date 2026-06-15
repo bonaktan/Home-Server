@@ -23,8 +23,8 @@ storage:
 http:
   addr: :5000
   tls:
-    certificate: /certs/registry.crt
-    key: /certs/registry.key
+    certificate: /certs/cert.pem
+    key: /certs/privkey.pem
   headers:
     X-Content-Type-Options: [nosniff]
     X-Frame-Options: [DENY]
