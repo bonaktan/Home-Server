@@ -1,0 +1,4 @@
+.env
+
+infra/registry/auth/*
+infra/registry/certs/*

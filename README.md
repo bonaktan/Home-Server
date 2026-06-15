@@ -17,7 +17,8 @@ A Centralized Configuration for Home-Server Infrastructure
 N/A
 
 ### Infrastructure Services
-- \+ nginx          (Client Networking)
+- \+ Registry           (Docker Image Management)
+- \+ Cloudflared        (Client Networking)
 
 ### Bare Metal Software
 - \+ Docker (Required - Infrastructure)

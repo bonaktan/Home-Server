@@ -1,0 +1,84 @@
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+
+volumes:
+  registry-data:
+    driver: local
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: infra-cloudflared
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
+    networks:
+      - frontend_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=cloudflared"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 64M
+        reservations:
+          cpus: "0.25"
+          memory: 32M
+    restart: always
+  registry:
+    image: registry:2
+    container_name: infra-registry
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Docker Registry"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      REGISTRY_LOG_LEVEL: info
+      REGISTRY_LOG_FORMATTER: json
+      REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "true"
+      REGISTRY_HEALTH_STORAGEDRIVER_INTERVAL: 10s
+      REGISTRY_HEALTH_STORAGEDRIVER_THRESHOLD: 3
+    volumes:
+      - registry-data:/var/lib/registry
+      - ./infra/registry/auth:/auth:ro
+      - /etc/letsencrypt/live/bonnybonnybonaktan.xyz:/certs:ro
+      - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
+    networks:
+      - frontend_net
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost:5000/v2/_catalog", "--no-check-certificate" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: infra-registry-ui
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      REGISTRY_TITLE: "Private Docker Registry"
+      REGISTRY_URL: https://registry:5000
+      SINGLE_REGISTRY: "true"
+      DELETE_IMAGES: "true"
+      NGINX_PROXY_PASS_URL: https://registry:5000
+    depends_on:
+      registry:
+        condition: service_healthy
+    networks:
+      - frontend_net

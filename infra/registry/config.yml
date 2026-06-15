@@ -1,0 +1,43 @@
+version: 0.1
+
+log:
+  level: info
+  formatter: json
+  fields:
+    service: registry
+
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+  delete:
+    enabled: true
+  cache:
+    blobdescriptor: inmemory
+  maintenance:
+    uploadpurging:
+      enabled: true
+      age: 168h
+      interval: 24h
+      dryrun: false
+
+http:
+  addr: :5000
+  tls:
+    certificate: /certs/registry.crt
+    key: /certs/registry.key
+  headers:
+    X-Content-Type-Options: [nosniff]
+    X-Frame-Options: [DENY]
+    Content-Security-Policy: ["default-src 'none'"]
+    Strict-Transport-Security: ["max-age=31536000; includeSubDomains"]
+
+auth:
+  htpasswd:
+    realm: Docker Registry
+    path: /auth/htpasswd
+
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
