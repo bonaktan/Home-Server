@@ -23,7 +23,7 @@ storage:
 http:
   addr: :5000
   tls:
-    certificate: /certs/cert.pem
+    certificate: /certs/fullchain.pem
     key: /certs/privkey.pem
   headers:
     X-Content-Type-Options: [nosniff]

@@ -44,7 +44,7 @@ services:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: "Docker Registry"
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/fullchain.pem
       REGISTRY_HTTP_TLS_KEY: /certs/privkey.pem
       REGISTRY_LOG_LEVEL: info
       REGISTRY_LOG_FORMATTER: json
@@ -53,9 +53,10 @@ services:
       REGISTRY_HEALTH_STORAGEDRIVER_THRESHOLD: 3
     volumes:
       - registry-data:/var/lib/registry
-      - ./infra/registry/auth:/auth:ro
-      - /etc/letsencrypt/live/bonnybonnybonaktan.xyz:/certs:ro
-      - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
+      - ./auth:/auth:ro
+      - /etc/letsencrypt/live/${ROOT_DOMAIN}:/certs:ro
+      - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
+      - ./config.yml:/etc/docker/registry/config.yml:ro
     networks:
       - frontend_net
     healthcheck:
