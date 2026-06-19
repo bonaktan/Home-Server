@@ -1,0 +1,58 @@
+- name: Initial Setup
+  hosts: home_server
+  become: true
+  vars:
+    TAILSCALE_AUTH_KEY: tskey-auth-k9KfNQ3SS921CNTRL-MHZ4wMUpd9dHjdWQRa9R9dQgZ7fr9TzUR
+  tasks:
+    - name: Add Docker APT repository
+      ansible.builtin.deb822_repository:
+        name: docker
+        types: deb
+        uris: https://download.docker.com/linux/debian
+        suites: "{{ ansible_distribution_release }}"
+        components: stable
+        signed_by: https://download.docker.com/linux/debian/gpg
+        state: present
+    - name: Add Tailscale APT repository
+      ansible.builtin.deb822_repository:
+        name: tailscale
+        types: deb
+        uris: https://pkgs.tailscale.com/stable/debian
+        suites: "{{ ansible_distribution_release }}"
+        components: main
+        signed_by: "https://pkgs.tailscale.com/stable/debian/{{ ansible_distribution_release }}.noarmor.gpg"
+        state: present
+    - name: Set kernel network parameters
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        sysctl_set: true
+        state: present
+        reload: true
+      loop:
+        - { name: net.ipv4.ip_forward, value: "1" }
+        - { name: net.ipv6.conf.all.forwarding, value: "1" }
+
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - python3-debian
+          - tailscale
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Turn on Tailscale
+      ansible.builtin.shell: tailscale up --auth-key={{TAILSCALE_AUTH_KEY}}

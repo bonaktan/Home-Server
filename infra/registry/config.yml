@@ -23,8 +23,8 @@ storage:
 http:
   addr: :5000
   tls:
-    certificate: /certs/fullchain.pem
-    key: /certs/privkey.pem
+    certificate: ${REGISTRY_HTTP_TLS_CERTIFICATE}
+    key: ${REGISTRY_HTTP_TLS_KEY}
   headers:
     X-Content-Type-Options: [nosniff]
     X-Frame-Options: [DENY]
