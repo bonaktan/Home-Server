@@ -37,15 +37,11 @@ services:
     restart: always
   nginx:
     image: nginx:alpine
-    container_name: skybridge_nginx
+    container_name: infra-nginx
     ports:
-        - 8080:8080
+        - 80:8080
     volumes:
         - ./nginx.conf:/etc/nginx/nginx.conf:ro
-        - skybridge_nginx_logs:/var/log/nginx:rw
-    depends_on:
-        - backend
-        - frontend
     networks:
         - frontend_net
     logging:
@@ -103,7 +99,7 @@ services:
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
-    container_name: infra-registry-ui
+    container_name: infra-registry_ui
     restart: always
     ports:
       - "8080:80"
