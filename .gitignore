@@ -2,3 +2,7 @@
 
 infra/registry/auth/*
 infra/registry/certs/*
+
+.ansible/
+ansible/password.txt
+ansible/envvars.yaml
