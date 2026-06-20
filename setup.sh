@@ -149,7 +149,10 @@ systemctl restart ssh
 
 log "8. zsh + oh-my-zsh + plugins"
 apt-get install -y zsh
-su - "$KEY_USER" -c 'RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+if [ ! -d "$KEY_HOME/.oh-my-zsh" ]; then
+  su - "$KEY_USER" -c 'RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+fi
+[ -f "$KEY_HOME/.zshrc" ] || su - "$KEY_USER" -c "cp $KEY_HOME/.oh-my-zsh/templates/zshrc.zsh-template $KEY_HOME/.zshrc"
 ZSH_CUSTOM="$KEY_HOME/.oh-my-zsh/custom"
 [ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] || \
   su - "$KEY_USER" -c "git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions"
@@ -183,7 +186,7 @@ usermod -aG docker "$KEY_USER"
 log "11. Tailscale"
 curl -fsSL https://tailscale.com/install.sh | sh
 if [ -n "${TS_AUTHKEY:-}" ]; then
-  tailscale up --auth-key="$TS_AUTHKEY"
+  tailscale up --authkey="$TS_AUTHKEY"
 else
   echo "Tailscale already up, skipping 'tailscale up'."
 fi
