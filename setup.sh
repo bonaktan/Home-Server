@@ -23,7 +23,12 @@ log(){ echo -e "\n=== $* ===\n"; }
 # Self-daemonize: prompt for Tailscale auth key now (interactive), then re-exec
 # this script in the background so it survives the SSH tunnel dropping.
 if [ -z "${BOOTSTRAP_DAEMONIZED:-}" ]; then
-  read -s -p "Tailscale auth key (tskey-...): " TS_AUTHKEY; echo
+  if command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1; then
+    TS_AUTHKEY=""
+    echo "Tailscale already connected, skipping auth-key prompt."
+  else
+    read -s -p "Tailscale auth key (tskey-...): " TS_AUTHKEY; echo
+  fi
   SCRIPT_PATH="$(readlink -f "$0")"
   export TS_AUTHKEY BOOTSTRAP_DAEMONIZED=1
   nohup setsid "$SCRIPT_PATH" >/root/bootstrap.log 2>&1 < /dev/null &
@@ -69,7 +74,7 @@ apt-get update -y
 apt-get install -y \
   firmware-linux firmware-linux-nonfree linux-headers-$(uname -r) \
   build-essential curl wget vim htop net-tools git unzip ca-certificates \
-  gnupg nftables \
+  gnupg software-properties-common nftables \
   unattended-upgrades apt-listchanges fail2ban || true
 
 log "3. unattended-upgrades"
@@ -177,11 +182,15 @@ usermod -aG docker "$KEY_USER"
 
 log "11. Tailscale"
 curl -fsSL https://tailscale.com/install.sh | sh
-tailscale up --authkey="$TS_AUTHKEY"
+if [ -n "${TS_AUTHKEY:-}" ]; then
+  tailscale up --auth-key="$TS_AUTHKEY"
+else
+  echo "Tailscale already up, skipping 'tailscale up'."
+fi
 
 log "12. tmux + ctop"
-apt-get install -y tmux ca-certificates curl gnupg 
-curl -fsSL https://azlux.fr/repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/azlux-archive-keyring.gpg
+apt-get install -y tmux ca-certificates curl gnupg lsb-release
+curl -fsSL https://azlux.fr/repo.gpg.key | gpg --yes --dearmor -o /usr/share/keyrings/azlux-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian $(lsb_release -cs) main" \
   | tee /etc/apt/sources.list.d/azlux.list >/dev/null
 apt-get update -y
