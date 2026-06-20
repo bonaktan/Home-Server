@@ -13,15 +13,6 @@
         components: stable
         signed_by: https://download.docker.com/linux/debian/gpg
         state: present
-    - name: Add Tailscale APT repository
-      ansible.builtin.deb822_repository:
-        name: tailscale
-        types: deb
-        uris: https://pkgs.tailscale.com/stable/debian
-        suites: "{{ ansible_distribution_release }}"
-        components: main
-        signed_by: "https://pkgs.tailscale.com/stable/debian/{{ ansible_distribution_release }}.noarmor.gpg"
-        state: present
     - name: Set kernel network parameters
       ansible.posix.sysctl:
         name: "{{ item.name }}"
@@ -45,14 +36,27 @@
           - ca-certificates
           - curl
           - python3-debian
-          - tailscale
           - docker-ce
           - docker-ce-cli
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
+          - git
         state: present
         update_cache: true
 
-    - name: Turn on Tailscale
-      ansible.builtin.shell: tailscale up --auth-key={{TAILSCALE_AUTH_KEY}}
+    - name: Setup Tailscale
+      ansible.builtin.shell: curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --auth-key={{TAILSCALE_AUTH_KEY}} --force-reauth
+
+    - name: Pull Infrastructure from Remote
+      ansible.builtin.git:
+        repo: 'https://github.com/bonaktan/Home-Server.git'
+        dest: /srv/Home-Server
+        version: main
+        force: yes
+    - name: Deploy Infrastructure 
+      community.docker.docker_compose_v2:
+        project_src: /srv/Home-Server
+        state: present
+        pull: always
+        build: always

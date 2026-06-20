@@ -9,6 +9,9 @@ volumes:
     driver: local
 
 services:
+  ##################################################################
+  # Shared Cloudflare/nginx
+  ##################################################################
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: infra-cloudflared
@@ -32,6 +35,38 @@ services:
           cpus: "0.25"
           memory: 32M
     restart: always
+  nginx:
+    image: nginx:alpine
+    container_name: skybridge_nginx
+    ports:
+        - 8080:8080
+    volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+        - skybridge_nginx_logs:/var/log/nginx:rw
+    depends_on:
+        - backend
+        - frontend
+    networks:
+        - frontend_net
+    logging:
+        driver: "json-file"
+        options:
+            max-size: "10m"
+            max-file: "3"
+            labels: "service=nginx"
+    deploy:
+        resources:
+            limits:
+                cpus: "0.50"
+                memory: 64M
+            reservations:
+                cpus: "0.25"
+                memory: 32M
+    restart: always
+
+  ##################################################################
+  # Docker Image Registry
+  ##################################################################
   registry:
     image: registry:2
     container_name: infra-registry
@@ -53,10 +88,10 @@ services:
       REGISTRY_HEALTH_STORAGEDRIVER_THRESHOLD: 3
     volumes:
       - registry-data:/var/lib/registry
-      - ./auth:/auth:ro
+      - ./infra/registry/auth:/auth:ro
       - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
       - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
-      - ./config.yml:/etc/docker/registry/config.yml:ro
+      - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
     networks:
       - frontend_net
     # healthcheck:
