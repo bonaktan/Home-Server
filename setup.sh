@@ -69,7 +69,7 @@ apt-get update -y
 apt-get install -y \
   firmware-linux firmware-linux-nonfree linux-headers-$(uname -r) \
   build-essential curl wget vim htop net-tools git unzip ca-certificates \
-  gnupg software-properties-common nftables \
+  gnupg nftables \
   unattended-upgrades apt-listchanges fail2ban || true
 
 log "3. unattended-upgrades"
