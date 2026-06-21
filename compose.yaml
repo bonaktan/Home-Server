@@ -39,25 +39,27 @@ services:
     image: nginx:alpine
     container_name: infra-nginx
     ports:
-        - 80:8080
+      - 80:8080
     volumes:
-        - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/certs:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
+      - ./infra/certs:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
     networks:
-        - frontend_net
+      - frontend_net
     logging:
-        driver: "json-file"
-        options:
-            max-size: "10m"
-            max-file: "3"
-            labels: "service=nginx"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=nginx"
     deploy:
-        resources:
-            limits:
-                cpus: "0.50"
-                memory: 64M
-            reservations:
-                cpus: "0.25"
-                memory: 32M
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 64M
+        reservations:
+          cpus: "0.25"
+          memory: 32M
     restart: always
 
   ##################################################################
@@ -76,7 +78,7 @@ services:
       REGISTRY_AUTH_HTPASSWD_REALM: "Docker Registry"
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
       REGISTRY_HTTP_TLS_CERTIFICATE: /etc/letsencrypt/live/${ROOT_DOMAIN}/fullchain.pem
-      REGISTRY_HTTP_TLS_KEY: /etc/letsencrypt/archive/live/${ROOT_DOMAIN}/privkey.pem
+      REGISTRY_HTTP_TLS_KEY: /etc/letsencrypt/live/${ROOT_DOMAIN}/privkey.pem
       REGISTRY_LOG_LEVEL: info
       REGISTRY_LOG_FORMATTER: json
       REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "true"
@@ -85,17 +87,11 @@ services:
     volumes:
       - registry-data:/var/lib/registry
       - ./infra/registry/auth:/auth:ro
-      - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
-      - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
+      - ./infra/certs:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
+      - ./infra/certs:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
       - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
     networks:
       - frontend_net
-    # healthcheck:
-    #   test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost:5000/v2/_catalog", "--no-check-certificate" ]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 15s
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
@@ -110,7 +106,6 @@ services:
       DELETE_IMAGES: "true"
       NGINX_PROXY_PASS_URL: https://registry:5000
     depends_on:
-      registry:
-        condition: service_healthy
+      - registry
     networks:
       - frontend_net

@@ -26,6 +26,11 @@ http:
     certificate: ${REGISTRY_HTTP_TLS_CERTIFICATE}
     key: ${REGISTRY_HTTP_TLS_KEY}
   headers:
+    Access-Control-Allow-Origin: ['http://localhost:8080', 'https://registry.bonnybonnybonaktan.xyz']
+    Access-Control-Allow-Methods: ['HEAD', 'GET', 'OPTIONS', 'DELETE']
+    Access-Control-Allow-Headers: ['Authorization', 'Accept', 'Cache-Control']
+    Access-Control-Allow-Credentials: [true]
+    Access-Control-Expose-Headers: ['Docker-Content-Digest']
     X-Content-Type-Options: [nosniff]
     X-Frame-Options: [DENY]
     Content-Security-Policy: ["default-src 'none'"]

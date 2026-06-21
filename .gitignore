@@ -1,7 +1,8 @@
 .env
 
 infra/registry/auth/*
-infra/registry/certs/*
+infra/certs/fullchain.pem
+infra/certs/privkey.pem
 
 .ansible/
 ansible/password.txt
