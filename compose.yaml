@@ -1,7 +1,10 @@
 networks:
-  frontend_net:
+  shared_infra_net:
     driver: bridge
-  backend_net:
+    ipam:
+      config:
+        - subnet: 172.16.0.0/16
+  infra_services_net:
     driver: bridge
 
 volumes:
@@ -19,47 +22,58 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
     networks:
-      - frontend_net
+      - shared_infra_net
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
         labels: "service=cloudflared"
+    depends_on:
+      - nginx
     deploy:
       resources:
         limits:
-          cpus: "0.50"
-          memory: 64M
+          cpus: "1"
+          memory: 256M
         reservations:
-          cpus: "0.25"
-          memory: 32M
+          cpus: "1"
+          memory: 64M
     restart: always
   nginx:
     image: nginx:alpine
     container_name: infra-nginx
     ports:
-      - 80:8080
+      - 80:80
+      - 443:443
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infra/certs:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
-      - ./infra/certs:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/certs:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
+      - ./infra/certs:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
+      - ./infra/certs:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
+      - ./infra/certs:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
     networks:
-      - frontend_net
+      - shared_infra_net
+      - infra_services_net
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
         labels: "service=nginx"
+    depends_on:
+      - registry
+      - registry-ui
+      - cloudflared
     deploy:
       resources:
         limits:
-          cpus: "0.50"
-          memory: 64M
+          cpus: "1"
+          memory: 256M
         reservations:
-          cpus: "0.25"
-          memory: 32M
+          cpus: "1"
+          memory: 64M
     restart: always
 
   ##################################################################
@@ -69,16 +83,14 @@ services:
     image: registry:2
     container_name: infra-registry
     restart: always
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: "Docker Registry"
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_HTTP_TLS_CERTIFICATE: /etc/letsencrypt/live/${ROOT_DOMAIN}/fullchain.pem
-      REGISTRY_HTTP_TLS_KEY: /etc/letsencrypt/live/${ROOT_DOMAIN}/privkey.pem
       REGISTRY_LOG_LEVEL: info
       REGISTRY_LOG_FORMATTER: json
       REGISTRY_HEALTH_STORAGEDRIVER_ENABLED: "true"
@@ -87,25 +99,23 @@ services:
     volumes:
       - registry-data:/var/lib/registry
       - ./infra/registry/auth:/auth:ro
-      - ./infra/certs:/etc/letsencrypt/live/${ROOT_DOMAIN}:ro
-      - ./infra/certs:/etc/letsencrypt/archive/${ROOT_DOMAIN}:ro
       - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
     networks:
-      - frontend_net
+      - infra_services_net
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: infra-registry_ui
     restart: always
-    ports:
-      - "8080:80"
+    expose:
+      - "80"
     environment:
-      REGISTRY_TITLE: "Private Docker Registry"
-      REGISTRY_URL: https://registry:5000
+      REGISTRY_TITLE: "bonnybonnybonaktan.xyz Registry"
+      REGISTRY_URL: https://registry.bonnybonnybonaktan.xyz
       SINGLE_REGISTRY: "true"
       DELETE_IMAGES: "true"
-      NGINX_PROXY_PASS_URL: https://registry:5000
+      NGINX_PROXY_PASS_URL: http://registry:5000
     depends_on:
       - registry
     networks:
-      - frontend_net
+      - infra_services_net
