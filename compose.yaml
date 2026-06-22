@@ -29,8 +29,6 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=cloudflared"
-    depends_on:
-      - nginx
     deploy:
       resources:
         limits:
