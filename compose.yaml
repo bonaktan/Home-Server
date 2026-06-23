@@ -6,7 +6,9 @@ networks:
         - subnet: 172.16.0.0/16
   infra_services_net:
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 volumes:
   registry-data:
     driver: local
@@ -75,6 +77,41 @@ services:
     restart: always
 
   ##################################################################
+  # Home Networking
+  ##################################################################
+  pihole:
+    container_name: infra-pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "123:123/udp"
+    expose:
+      - "80"
+    environment:
+      TZ: 'Asia/Manila'
+      FTLCONF_webserver_api_password: 'putanginanyo@As1'
+      FTLCONF_dns_listeningMode: 'ALL'
+    volumes:
+      - './infra/pihole:/etc/pihole:rw'
+    networks:
+      - infra_services_net
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "1"
+          memory: 256M
+
+  ##################################################################
   # Docker Image Registry
   ##################################################################
   registry:
@@ -100,6 +137,14 @@ services:
       - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
     networks:
       - infra_services_net
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 32M
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
@@ -117,3 +162,11 @@ services:
       - registry
     networks:
       - infra_services_net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 64M
+        reservations:
+          cpus: "0.25"
+          memory: 32M

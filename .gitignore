@@ -6,3 +6,5 @@ infra/certs/*.pem
 .ansible/
 ansible/password.txt
 ansible/envvars.yaml
+
+infra/pihole/*
