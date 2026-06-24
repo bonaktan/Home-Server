@@ -8,9 +8,13 @@ A Centralized Configuration for Home-Server Infrastructure
 * Each application service is isolated but connects to shared resources
 * Secrets are encrypted at rest and never committed in plaintext
 
+## Version 0.1.0
+### Client Services
+- \+ Registry-UI         (registry.bonnybonnybonaktan.xyz)
 
-# Commands
-## Ansible Deployments
+### Infrastructure Services
+- \+ nginx              (Client Networking)
+- \+ Pi-hole            (Home Network Infrastucture)
 
 ## Version 0.0.1
 ### Client Services
