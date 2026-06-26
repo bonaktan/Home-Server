@@ -57,6 +57,8 @@ services:
     networks:
       - shared_infra_net
       - infra_services_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
