@@ -1,14 +1,8 @@
 networks:
   shared_infra_net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.16.0.0/16
   infra_services_net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
   registry-data:
@@ -58,7 +52,7 @@ services:
       - shared_infra_net
       - infra_services_net
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:172.16.0.1"
     logging:
       driver: "json-file"
       options:
