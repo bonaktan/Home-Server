@@ -54,7 +54,7 @@ services:
       - ./infra/certs:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
     networks:
       - shared_infra_net
-      - infra_services_net
+      - infra_services
     extra_hosts:
       - "host.docker.internal:172.16.0.1"
     logging:
@@ -179,7 +179,7 @@ services:
       - ./infra/registry/auth:/auth:ro
       - ./infra/registry/config.yml:/etc/docker/registry/config.yml:ro
     networks:
-      - infra_services_net
+      - infra_services
     deploy:
       resources:
         limits:
@@ -204,7 +204,7 @@ services:
     depends_on:
       - registry
     networks:
-      - infra_services_net
+      - infra_services
     deploy:
       resources:
         limits:
