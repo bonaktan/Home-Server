@@ -115,7 +115,7 @@ services:
       FLYWAY_USER: ${POSTGRES_USER}
       FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
-      postgres:
+      database:
         condition: service_healthy
     networks:
       - shared_infra_database
