@@ -1,13 +1,17 @@
 networks:
   shared_infra_net:
     driver: bridge
-  infra_services_net:
+  infra_services:
+    driver: bridge
+  shared_infra_database: 
     driver: bridge
 
 volumes:
   registry-data:
     driver: local
-
+  database-data:
+    driver: local
+  
 services:
   ##################################################################
   # Shared Cloudflare/nginx
@@ -25,7 +29,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=cloudflared"
+        labels: "service=infra-cloudflared"
     deploy:
       resources:
         limits:
@@ -58,7 +62,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=nginx"
+        labels: "service=infra-nginx"
     depends_on:
       - registry
       - registry-ui
@@ -72,7 +76,50 @@ services:
           cpus: "1"
           memory: 64M
     restart: always
-
+  
+  ##################################################################
+  # Shared Database
+  ##################################################################
+  database:
+    image: postgres:18-alpine
+    container_name: infra-database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - shared_infra_database
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-database"
+    restart: always
+  
+  database_migration:
+    image: flyway/flyway:10
+    container_name: infra-database_migration
+    command: migrate
+    volumes:
+      - ./imfra/migration/sql:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://database:5432/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shared_infra_database
+  
   ##################################################################
   # Home Networking
   ##################################################################
