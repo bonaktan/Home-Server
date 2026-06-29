@@ -90,7 +90,7 @@ services:
     networks:
       - shared_infra_database
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - database-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
