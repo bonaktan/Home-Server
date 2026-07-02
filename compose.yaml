@@ -95,6 +95,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "1"
+          memory: 256M
     logging:
       driver: "json-file"
       options:
@@ -121,6 +129,7 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-database_pgadmin"
+        
   database_migration:
     image: flyway/flyway:10
     container_name: infra-database_migration
@@ -131,11 +140,17 @@ services:
       FLYWAY_URL: jdbc:postgresql://database:5432/${POSTGRES_DB}
       FLYWAY_USER: ${POSTGRES_USER}
       FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+      FLYWAY_MIXED: "true"
     depends_on:
       database:
         condition: service_healthy
     networks:
       - shared_infra_database
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
   
   ##################################################################
   # Home Networking
