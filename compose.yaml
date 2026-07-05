@@ -275,6 +275,8 @@ services:
     container_name: infra-node_exporter
     command:
       - '--path.rootfs=/host'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     network_mode: host
     pid: host
     restart: always
