@@ -254,7 +254,7 @@ services:
   ##################################################################
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
+    container_name: infra-prometheus
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     expose:
@@ -270,9 +270,20 @@ services:
           cpus: "0.25"
           memory: 64M
 
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: infra-node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: always
+    volumes:
+      - /:/host:ro,rslave
+
   loki:
     image: grafana/loki:latest
-    container_name: loki
+    container_name: infra-loki
     expose:
       - "3100"
     volumes:
@@ -291,7 +302,7 @@ services:
 
   promtail:
     image: grafana/promtail:latest
-    container_name: promtail
+    container_name: infra-promtail
     volumes:
       - ./infra/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/run/docker.sock:/var/run/docker.sock
@@ -312,7 +323,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: infra-grafana
     expose:
       - "3000"
     environment:
