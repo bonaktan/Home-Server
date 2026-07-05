@@ -172,6 +172,8 @@ services:
       FTLCONF_dns_listeningMode: 'ALL'
     volumes:
       - './infra/pihole:/etc/pihole:rw'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     network_mode: 'host'
     cap_add:
       - NET_ADMIN
@@ -261,6 +263,8 @@ services:
       - "9090"
     networks:
       - infra_services
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         limits:
@@ -275,8 +279,6 @@ services:
     container_name: infra-node_exporter
     command:
       - '--path.rootfs=/host'
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     network_mode: host
     pid: host
     restart: always
