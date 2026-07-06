@@ -264,7 +264,7 @@ services:
     networks:
       - infra_services
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:172.21.0.1"
     deploy:
       resources:
         limits:
