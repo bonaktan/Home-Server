@@ -152,6 +152,12 @@ services:
         limits:
           cpus: "0.25"
           memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-database_migration"
   
   ##################################################################
   # Home Networking
@@ -180,6 +186,12 @@ services:
       - SYS_TIME
       - SYS_NICE
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-pihole"
     deploy:
       resources:
         limits:
@@ -216,6 +228,12 @@ services:
     networks:
       - infra_services
       - shared_infra_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-registry"
     deploy:
       resources:
         limits:
@@ -228,7 +246,7 @@ services:
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: infra-registry_ui
-    restart: always
+    restart: unless-stopped
     expose:
       - "80"
     environment:
@@ -242,6 +260,12 @@ services:
     networks:
       - infra_services
       - shared_infra_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-registry-ui"
     deploy:
       resources:
         limits:
@@ -265,6 +289,12 @@ services:
       - infra_services
     extra_hosts:
       - "host.docker.internal:172.21.0.1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-prometheus"
     deploy:
       resources:
         limits:
@@ -273,6 +303,7 @@ services:
         reservations:
           cpus: "0.25"
           memory: 64M
+    restart: always
 
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -284,6 +315,20 @@ services:
     restart: always
     volumes:
       - /:/host:ro,rslave
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-node_exporter"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+        reservations:
+          cpus: "0.25"
+          memory: 32M
 
   loki:
     image: grafana/loki:latest
@@ -295,6 +340,12 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - infra_services
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-loki"
     deploy:
       resources:
         limits:
@@ -303,6 +354,7 @@ services:
         reservations:
           cpus: "0.25"
           memory: 64M
+    restart: always
 
   promtail:
     image: grafana/promtail:latest
@@ -316,6 +368,12 @@ services:
       - infra_services
     depends_on:
       - loki
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-promtail"
     deploy:
       resources:
         limits:
@@ -324,6 +382,7 @@ services:
         reservations:
           cpus: "0.25"
           memory: 32M
+    restart: always
 
   grafana:
     image: grafana/grafana:latest
@@ -341,6 +400,12 @@ services:
     depends_on:
       - prometheus
       - loki
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-grafana"
     deploy:
       resources:
         limits:
@@ -349,3 +414,4 @@ services:
         reservations:
           cpus: "0.5"
           memory: 256M
+    restart: always
