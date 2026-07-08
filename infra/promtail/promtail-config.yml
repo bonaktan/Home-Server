@@ -17,3 +17,14 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: 'container'
+    pipeline_stages:
+      - match:
+          selector: '{container=~"cloudflared.*"}'
+          stages:
+            - regex:
+                expression: '^(?P<timestamp>\S+)\s+(?P<level>INF|ERR|WRN|DBG|FTL)\s+(?P<message>.*)$'
+            - template:
+                source: level
+                template: '{{ if eq .Value "INF" }}info{{ else if eq .Value "ERR" }}error{{ else if eq .Value "WRN" }}warn{{ else if eq .Value "DBG" }}debug{{ else if eq .Value "FTL" }}critical{{ else }}unknown{{ end }}'
+            - labels:
+                level:
