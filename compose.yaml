@@ -13,7 +13,8 @@ volumes:
     driver: local
   observ-grafana-data:
     driver: local
-
+  static-website-data:
+    driver: local
 
 services:
   ##################################################################
@@ -55,6 +56,7 @@ services:
       - ./infra/certs:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
       - ./infra/certs:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
       - ./infra/certs:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
+      - static-website-data:/var/www:ro
     networks:
       - shared_infra_net
     extra_hosts:
