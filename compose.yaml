@@ -394,6 +394,10 @@ services:
       - "3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_PROTOCOL=http
+      - GF_SERVER_DOMAIN=grafana.bonnybonnybonaktan.xyz
+      - GF_SERVER_ROOT_URL=https://grafana.bonnybonnybonaktan.xyz/
+      - GF_SECURITY_CSRF_TRUSTED_ORIGINS=grafana.bonnybonnybonaktan.xyz
     volumes:
       - observ-grafana-data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning
