@@ -288,6 +288,7 @@ services:
     expose:
       - "9090"
     networks:
+      - shared_infra_net
       - infra_services
     extra_hosts:
       - "host.docker.internal:172.21.0.1"
