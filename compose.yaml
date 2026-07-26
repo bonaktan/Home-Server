@@ -9,7 +9,11 @@ networks:
 volumes:
   registry-data:
     driver: local
-  database-data:
+  postgresql-data:
+    driver: local
+  mariadb-data:
+    driver: local
+  panel-cache-data:
     driver: local
   observ-grafana-data:
     driver: local
@@ -82,9 +86,9 @@ services:
   ##################################################################
   # Shared Database
   ##################################################################
-  database:
+  postgresql:
     image: postgres:18-alpine
-    container_name: infra-database
+    container_name: infra-postgresql
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -92,7 +96,7 @@ services:
     networks:
       - shared_infra_database
     volumes:
-      - database-data:/var/lib/postgresql
+      - postgresql-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
@@ -101,22 +105,22 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: "1"
+          cpus: "0.25"
           memory: 256M
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=infra-database"
+        labels: "service=infra-postgresql"
     restart: always
 
-  database_pgadmin:
+  postgresql_pgadmin:
     image: dpage/pgadmin4
-    container_name: infra-database_pgadmin
+    container_name: infra-postgresql_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
@@ -124,28 +128,28 @@ services:
       - shared_infra_net
       - shared_infra_database
     depends_on:
-      database:
+      postgresql:
         condition: service_healthy
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=infra-database_pgadmin"
+        labels: "service=infra-postgresql_pgadmin"
         
-  database_migration:
+  postgresql_migration:
     image: flyway/flyway:10
-    container_name: infra-database_migration
+    container_name: infra-postgresql_migration
     command: migrate
     volumes:
-      - ./infra/migration/sql:/flyway/sql
+      - ./infra/migration/postgresql:/flyway/sql
     environment:
-      FLYWAY_URL: jdbc:postgresql://database:5432/${POSTGRES_DB}
+      FLYWAY_URL: jdbc:postgresql://postgresql:5432/${POSTGRES_DB}
       FLYWAY_USER: ${POSTGRES_USER}
       FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
       FLYWAY_MIXED: "true"
     depends_on:
-      database:
+      postgresql:
         condition: service_healthy
     networks:
       - shared_infra_database
@@ -159,7 +163,61 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=infra-database_migration"
+        labels: "service=infra-postgresql_migration"
+
+  mariadb:
+    image: mariadb:11
+    container_name: infra-mariadb
+    restart: always
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql:rw
+    environment:
+      MYSQL_DATABASE: ${MARIADB_DB}
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    networks:
+      - shared_infra_database
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-mariadb"
+  mariadb_migration:
+    image: flyway/flyway:10
+    container_name: infra-mariadb_migration
+    command: migrate
+    volumes:
+      - ./infra/migration/mariadb:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:mariadb://mariadb:3306/${MARIADB_DB}
+      FLYWAY_USER: root
+      FLYWAY_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      FLYWAY_MIXED: "true"
+    networks:
+      - shared_infra_database
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-postgresql_migration"
   
   ##################################################################
   # Home Networking
@@ -202,6 +260,106 @@ services:
         reservations:
           cpus: "1"
           memory: 256M
+
+  ##################################################################
+  # Pterodactyl Hosting Service
+  ##################################################################
+  panel-cache:
+    image: redis:alpine
+    container_name: infra-pterodactyl_cache
+    command: [
+      "redis-server",
+      "--appendonly yes"
+    ]
+    expose:
+      - 6379
+    restart: always
+    networks:
+      - infra_services
+    volumes:
+      - panel-cache-data:/data:rw
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-redis"
+  pterodactyl:
+    image: ghcr.io/pterodactyl/panel:latest
+    container_name: infra-pterodactyl
+    restart: always
+    expose:
+      - 80
+    networks:
+      - infra_services
+      - shared_infra_net
+      - shared_infra_database
+    volumes:
+      - ./infra/pterodactyl/var/:/app/var:rw
+      - ./infra/pterodactyl/etc:/etc/pterodactyl:rw
+      - ./infra/pterodactyl/nginx/:/etc/nginx/http.d:rw
+    environment:
+      APP_URL: "http://hosting.bonnybonnybonaktan.xyz"
+      APP_TIMEZONE: "Asia/Manila"
+      APP_SERVICE_AUTHOR: "noreply@hosting.bonnybonnybonaktan.xyz"
+      MAIL_FROM: "noreply@hosting.bonnybonnybonaktan.xyz"
+      MAIL_DRIVER: "log"
+      DB_PASSWORD: "pterodactyl"
+      APP_ENV: "production"
+      APP_ENVIRONMENT_ONLY: "false"
+      CACHE_DRIVER: "redis"
+      SESSION_DRIVER: "redis"
+      QUEUE_DRIVER: "redis"
+      REDIS_HOST: "panel-cache"
+      DB_HOST: "mariadb"
+      DB_PORT: "3306"
+      HASHIDS_LENGTH: 8
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-pterodactyl"
+  pterodactyl-wings:
+    image: ghcr.io/pterodactyl/wings:latest
+    container_name: infra-pterodactyl-wings
+    restart: always
+    networks:
+      - infra_services
+    expose:
+      - "8080"
+      - "2022"
+    tty: true
+    environment:
+      TZ: "UTC"
+      WINGS_UID: 988
+      WINGS_GID: 988
+      WINGS_USERNAME: pterodactyl
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/docker/containers/:/var/lib/docker/containers/"
+      - "./infra/pterodactyl/etc:/etc/pterodactyl/"
+      - "/var/lib/pterodactyl/:/var/lib/pterodactyl/"
+      - "/var/log/pterodactyl/:/var/log/pterodactyl/"
+      - "/tmp/pterodactyl/:/tmp/pterodactyl/"
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+      - "/run/wings:/run/wings"
 
   ##################################################################
   # Docker Image Registry
