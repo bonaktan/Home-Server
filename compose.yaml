@@ -341,10 +341,11 @@ services:
     container_name: infra-pterodactyl-wings
     restart: always
     networks:
+      - shared_infra_net
       - infra_services
     expose:
-      - "8080"
-      - "2022"
+      - 8080
+      - 2022
     tty: true
     environment:
       TZ: "UTC"
