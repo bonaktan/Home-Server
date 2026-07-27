@@ -1,4 +1,9 @@
 services:
+  nginx:
+    ports:
+      - 80:80
+      - 443:443
+      - 8081:8080
   postgresql:
     ports:
       - 127.0.0.1:5432:5432
@@ -10,7 +15,7 @@ services:
       - 6379:6379
   pterodactyl:
     ports:
-      - 80:80
+      - 81:80
   pterodactyl-wings:
     ports:
       - "8080:8080"
