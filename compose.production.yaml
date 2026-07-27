@@ -7,3 +7,7 @@ services:
       - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
       - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
       - /etc/letsencrypt/archive/internal.${ROOT_DOMAIN}:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
+  pterodactyl-wings:
+    volumes:
+      - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
+      - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro

@@ -1,15 +1,15 @@
 debug: false
 app_name: Pterodactyl
-uuid: 888f3999-1213-4491-aae5-0c8bfdfbbaea
-token_id: vohtKK9BuzEojSuo
-token: uCYmytjbFFRgNNZkhk8oqFUW1N1e6peGwgS39TjZs2TPSjiee7jNbxA78ur04EpM
+uuid: 646390f0-9340-402b-8bff-348daf032ba0
+token_id: nGZDUVx3OqYuvwVH
+token: dQblTY7Z1WGYjCXyUMYet3u6Xtcf6bZZnhjpnPw6RM1eDEMZ1dhRTpXYCY82RjTL
 api:
   host: 0.0.0.0
-  port: 8080
+  port: 8443
   ssl:
-    enabled: false
-    cert: /etc/letsencrypt/live/pterodactyl-wings/fullchain.pem
-    key: /etc/letsencrypt/live/pterodactyl-wings/privkey.pem
+    enabled: true
+    cert: /etc/letsencrypt/live/bonnybonnybonaktan.xyz/fullchain.pem
+    key: /etc/letsencrypt/live/bonnybonnybonaktan.xyz/privkey.pem
   disable_remote_download: false
   upload_limit: 100
   trusted_proxies: []
@@ -21,7 +21,7 @@ system:
   backup_directory: /var/lib/pterodactyl/backups
   tmp_directory: /tmp/pterodactyl
   username: pterodactyl
-  timezone: UTC
+  timezone: Asia/Manila
   user:
     rootless:
       enabled: false
@@ -105,6 +105,7 @@ remote_query:
   timeout: 30
   boot_servers_per_page: 50
 allowed_mounts: []
-allowed_origins: []
+allowed_origins:
+- https://hosting.bonnybonnybonaktan.xyz
 allow_cors_private_network: false
 ignore_panel_config_updates: false
