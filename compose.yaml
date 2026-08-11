@@ -66,6 +66,7 @@ services:
       - static-website-data:/var/www:ro
     networks:
       - shared_infra_net
+      - pterodactyl
     extra_hosts:
       - "host.docker.internal:172.16.0.1"
     logging:
