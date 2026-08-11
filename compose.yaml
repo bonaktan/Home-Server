@@ -5,6 +5,9 @@ networks:
     driver: bridge
   shared_infra_database: 
     driver: bridge
+  pterodactyl:
+    external: true
+    name: pterodactyl_nw
 
 volumes:
   registry-data:
