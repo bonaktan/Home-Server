@@ -500,6 +500,11 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: infra-cadvisor
     privileged: true
+    command:
+      - '--housekeeping_interval=30s'
+      - '--docker_only=true'
+      - '--store_container_labels=false'
+      - '--disable_metrics=disk,tcp,udp,percpu,sched,process'
     expose:
       - "8080"
     volumes:
@@ -516,21 +521,19 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-cadvisor"
+
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 256M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
+        limits: {cpus: "0.5", memory: 128M}
+        reservations: {cpus: "0.1", memory: 64M}
     restart: always
 
   loki:
     image: grafana/loki:latest
     container_name: infra-loki
     environment:
-      - GOGC=50
+      - GOGC=30
+      - GOMEMLIMIT=580MiB
     expose:
       - "3100"
     volumes:
