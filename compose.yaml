@@ -3,7 +3,7 @@ networks:
     driver: bridge
   infra_services:
     driver: bridge
-  shared_infra_database: 
+  shared_infra_database:
     driver: bridge
   pterodactyl:
     external: true
@@ -43,12 +43,9 @@ services:
         labels: "service=infra-cloudflared"
     deploy:
       resources:
-        limits:
-          cpus: "1"
-          memory: 256M
-        reservations:
-          cpus: "1"
-          memory: 64M
+        limits: { cpus: "0.5", memory: 128M }
+        reservations: { cpus: "0.1", memory: 32M }
+
     restart: always
   nginx:
     image: nginx:alpine
@@ -79,14 +76,11 @@ services:
       - cloudflared
     deploy:
       resources:
-        limits:
-          cpus: "1"
-          memory: 256M
-        reservations:
-          cpus: "1"
-          memory: 64M
+        limits: {cpus: "0.5", memory: 128M}
+        reservations: {cpus: "0.1", memory: 32M}
+
     restart: always
-  
+
   ##################################################################
   # Shared Database
   ##################################################################
@@ -102,18 +96,14 @@ services:
     volumes:
       - postgresql-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
       interval: 10s
       timeout: 5s
       retries: 5
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
+        limits: {cpus: "0.5", memory: 256M}
+        reservations: {cpus: "0.1", memory: 128M}
     logging:
       driver: "json-file"
       options:
@@ -140,7 +130,12 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-postgresql_pgadmin"
-        
+    deploy:
+      resources:
+        limits: {cpus: "0.5", memory: 512M}
+        reservations: {cpus: "0.1", memory: 256M}
+    restart: always
+
   postgresql_migration:
     image: flyway/flyway:10
     container_name: infra-postgresql_migration
@@ -184,14 +179,16 @@ services:
       MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     networks:
       - shared_infra_database
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.5"
-          memory: 256M
+        limits: {cpus: "0.5", memory: 256M}
+        reservations: {cpus: "0.1", memory: 128M}
     logging:
       driver: "json-file"
       options:
@@ -211,6 +208,9 @@ services:
       FLYWAY_MIXED: "true"
     networks:
       - shared_infra_database
+    depends_on:
+      mariadb:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -222,7 +222,7 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-postgresql_migration"
-  
+
   ##################################################################
   # Home Networking
   ##################################################################
@@ -258,12 +258,9 @@ services:
         labels: "service=infra-pihole"
     deploy:
       resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-        reservations:
-          cpus: "1"
-          memory: 256M
+        limits: {cpus: "0.5", memory: 256M}
+        reservations: {cpus: "0.25", memory: 128M}
+
 
   ##################################################################
   # Pterodactyl Hosting Service
@@ -271,10 +268,7 @@ services:
   panel-cache:
     image: redis:alpine
     container_name: infra-pterodactyl_cache
-    command: [
-      "redis-server",
-      "--appendonly yes"
-    ]
+    command: [ "redis-server", "--appendonly yes" ]
     expose:
       - 6379
     restart: always
@@ -282,14 +276,17 @@ services:
       - infra_services
     volumes:
       - panel-cache-data:/data:rw
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
+        limits: {cpus: "0.25", memory: 64M}
+        reservations: {cpus: "0.1", memory: 32M}
     logging:
       driver: "json-file"
       options:
@@ -326,14 +323,15 @@ services:
       DB_HOST: "mariadb"
       DB_PORT: "3306"
       HASHIDS_LENGTH: 8
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      panel-cache:
+        condition: service_healthy
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
+        limits: {cpus: "0.5", memory: 384M}
+        reservations: {cpus: "0.25", memory: 192M}
     logging:
       driver: "json-file"
       options:
@@ -365,6 +363,18 @@ services:
       - "/tmp/pterodactyl/:/tmp/pterodactyl/"
       - "/etc/ssl/certs:/etc/ssl/certs:ro"
       - "/run/wings:/run/wings"
+    depends_on:
+      - pterodactyl
+    deploy:
+      resources:
+        limits: {cpus: "1", memory: 512M}
+        reservations: {cpus: "0.25", memory: 128M}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-pterodactyl-wings"
 
   ##################################################################
   # Docker Image Registry
@@ -401,13 +411,8 @@ services:
         labels: "service=infra-registry"
     deploy:
       resources:
-        limits:
-          cpus: "1"
-          memory: 256M
-        reservations:
-          cpus: "0.25"
-          memory: 32M
-
+        limits: {cpus: "0.5", memory: 128M}
+        reservations: {cpus: "0.1", memory: 32M}
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: infra-registry_ui
@@ -433,12 +438,8 @@ services:
         labels: "service=infra-registry-ui"
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 64M
-        reservations:
-          cpus: "0.25"
-          memory: 32M
+        limits: {cpus: "0.25", memory: 32M}
+        reservations: {cpus: "0.1", memory: 16M}
 
   ##################################################################
   # Observability Stack
@@ -446,6 +447,13 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: infra-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--storage.tsdb.retention.size=200MB'
+      - '--storage.tsdb.wal-compression'
+    environment:
+      - GOMEMLIMIT=230MiB
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     expose:
@@ -463,12 +471,8 @@ services:
         labels: "service=infra-prometheus"
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-        reservations:
-          cpus: "0.25"
-          memory: 64M
+        limits: {cpus: "0.5", memory: 256M}
+        reservations: {cpus: "0.25", memory: 128M}
     restart: always
 
   node_exporter:
@@ -489,16 +493,44 @@ services:
         labels: "service=infra-node_exporter"
     deploy:
       resources:
+        limits: {cpus: "0.5", memory: 64M}
+        reservations: {cpus: "0.1", memory: 32M}
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: infra-cadvisor
+    privileged: true
+    expose:
+      - "8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - infra_services
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-cadvisor"
+    deploy:
+      resources:
         limits:
-          cpus: "0.25"
-          memory: 64M
+          cpus: "0.5"
+          memory: 256M
         reservations:
           cpus: "0.25"
-          memory: 32M
+          memory: 128M
+    restart: always
 
   loki:
     image: grafana/loki:latest
     container_name: infra-loki
+    environment:
+      - GOGC=50
     expose:
       - "3100"
     volumes:
@@ -514,17 +546,15 @@ services:
         labels: "service=infra-loki"
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-        reservations:
-          cpus: "0.25"
-          memory: 64M
+        limits: {cpus: "0.5", memory: 256M}
+        reservations: {cpus: "0.25", memory: 96M}
     restart: always
 
   promtail:
     image: grafana/promtail:latest
     container_name: infra-promtail
+    environment:
+      - GOGC=50
     volumes:
       - ./infra/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/run/docker.sock:/var/run/docker.sock
@@ -542,12 +572,8 @@ services:
         labels: "service=infra-promtail"
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-        reservations:
-          cpus: "0.25"
-          memory: 32M
+        limits: {cpus: "0.25", memory: 160M}
+        reservations: {cpus: "0.1", memory: 64M}
     restart: always
 
   grafana:
@@ -561,6 +587,11 @@ services:
       - GF_SERVER_DOMAIN=grafana.bonnybonnybonaktan.xyz
       - GF_SERVER_ROOT_URL=https://grafana.bonnybonnybonaktan.xyz/
       - GF_SECURITY_CSRF_TRUSTED_ORIGINS=grafana.bonnybonnybonaktan.xyz
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
+      - GOGC=50
+      - GOMEMLIMIT=550MiB
     volumes:
       - observ-grafana-data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning
@@ -578,10 +609,6 @@ services:
         labels: "service=infra-grafana"
     deploy:
       resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.5"
-          memory: 256M
+        limits: {cpus: "0.5", memory: 640M}
+        reservations: {cpus: "0.25", memory: 320M}
     restart: always

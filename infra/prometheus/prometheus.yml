@@ -10,7 +10,6 @@ scrape_configs:
     static_configs:
       - targets: ['172.21.0.1:9100']
 
-  # Add your own services here, e.g.:
-  # - job_name: 'my-app'
-  #   static_configs:
-  #     - targets: ['my-app:8080']
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
