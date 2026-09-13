@@ -595,6 +595,8 @@ services:
       - GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
       - GOGC=50
       - GOMEMLIMIT=550MiB
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - observ-grafana-data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning

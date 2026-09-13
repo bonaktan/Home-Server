@@ -83,6 +83,11 @@ docker:
   installer_limits:
     memory: 1024
     cpu: 100
+  cpu_period: 100000
+  cpu_burst:
+    enabled: true
+    percent: 100
+  cpu_shares: 0
   overhead:
     override: false
     default_multiplier: 1.05

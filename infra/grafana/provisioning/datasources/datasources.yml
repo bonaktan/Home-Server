@@ -1,13 +1,23 @@
 apiVersion: 1
 
 datasources:
-  - name: Prometheus
+  - name: Prometheus-Bonny
     type: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: true
 
-  - name: Loki
+  - name: Loki-Bonny
     type: loki
     access: proxy
     url: http://loki:3100
+
+  - name: Prometheus-Aki
+    type: prometheus
+    access: proxy
+    url: http://100.64.0.3:19090
+  
+  - name: Loki-Aki
+    type: loki
+    access: proxy
+    url: http://100.64.0.3:13100

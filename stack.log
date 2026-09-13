@@ -1,0 +1,408 @@
+time="2026-09-02T18:45:21+08:00" level=warning msg="Found orphan containers (infra-database_pgadmin, infra-database_migration) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container infra-loki Creating 
+ Container infra-cadvisor Creating 
+ Container infra-cadvisor Created 
+ Container infra-loki Created 
+Attaching to infra-cadvisor, infra-loki
+ Container infra-loki Starting 
+ Container infra-cadvisor Starting 
+ Container infra-loki Started 
+ Container infra-cadvisor Started 
+infra-cadvisor  | I0902 10:45:24.597731       1 cadvisor.go:126] enabled metrics: advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,diskIO,hugetlb,memory,memory_numa,network,oom_event,perf_event,pressure,referenced_memory,resctrl
+infra-cadvisor  | I0902 10:45:24.598055       1 storagedriver.go:55] Caching stats in memory for 2m0s
+infra-cadvisor  | I0902 10:45:24.847399       1 fs.go:130] Filesystem UUIDs: map[6D52-D2E8:/dev/mmcblk1p1 a8d00428-3ba0-4fd1-96f5-cdec815f4511:/dev/mmcblk1p3 b26ad7cd-c781-431f-a752-1c649cc52996:/dev/mmcblk1p2]
+infra-cadvisor  | I0902 10:45:24.847548       1 fs.go:131] Filesystem partitions: map[/dev:{mountpoint:/dev major:0 minor:99 fsType:tmpfs blockSize:0} /dev/mmcblk1p1:{mountpoint:/rootfs/boot/efi major:179 minor:1 fsType:vfat blockSize:0} /dev/mmcblk1p2:{mountpoint:/var/lib/docker major:179 minor:2 fsType:ext4 blockSize:0} /dev/shm:{mountpoint:/dev/shm major:0 minor:218 fsType:tmpfs blockSize:0} /rootfs/dev/shm:{mountpoint:/rootfs/dev/shm major:0 minor:25 fsType:tmpfs blockSize:0} /rootfs/run:{mountpoint:/rootfs/run major:0 minor:24 fsType:tmpfs blockSize:0} /rootfs/run/credentials/getty@tty1.service:{mountpoint:/rootfs/run/credentials/getty@tty1.service major:0 minor:49 fsType:tmpfs blockSize:0} /rootfs/run/credentials/systemd-journald.service:{mountpoint:/rootfs/run/credentials/systemd-journald.service major:0 minor:33 fsType:tmpfs blockSize:0} /rootfs/run/credentials/systemd-resolved.service:{mountpoint:/rootfs/run/credentials/systemd-resolved.service major:0 minor:34 fsType:tmpfs blockSize:0} /rootfs/run/lock:{mountpoint:/rootfs/run/lock major:0 minor:32 fsType:tmpfs blockSize:0} /rootfs/run/user/1000:{mountpoint:/rootfs/run/user/1000 major:0 minor:97 fsType:tmpfs blockSize:0} /rootfs/tmp:{mountpoint:/rootfs/tmp major:0 minor:44 fsType:tmpfs blockSize:0} /rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev:{mountpoint:/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev major:0 minor:99 fsType:tmpfs blockSize:0} /rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm:{mountpoint:/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm major:0 minor:218 fsType:tmpfs blockSize:0} /run:{mountpoint:/run major:0 minor:24 fsType:tmpfs blockSize:0} /run/credentials/getty@tty1.service:{mountpoint:/run/credentials/getty@tty1.service major:0 minor:49 fsType:tmpfs blockSize:0} /run/credentials/systemd-journald.service:{mountpoint:/run/credentials/systemd-journald.service major:0 minor:33 fsType:tmpfs blockSize:0} /run/credentials/systemd-resolved.service:{mountpoint:/run/credentials/systemd-resolved.service major:0 minor:34 fsType:tmpfs blockSize:0} /run/lock:{mountpoint:/run/lock major:0 minor:32 fsType:tmpfs blockSize:0} /run/user/1000:{mountpoint:/run/user/1000 major:0 minor:97 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev major:0 minor:99 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm major:0 minor:218 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/dev/shm:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/dev/shm major:0 minor:25 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run major:0 minor:24 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/getty@tty1.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/getty@tty1.service major:0 minor:49 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-journald.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-journald.service major:0 minor:33 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-resolved.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-resolved.service major:0 minor:34 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/lock:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/lock major:0 minor:32 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/user/1000:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/user/1000 major:0 minor:97 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/tmp:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/tmp major:0 minor:44 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev major:0 minor:99 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm major:0 minor:218 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run major:0 minor:24 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/getty@tty1.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/getty@tty1.service major:0 minor:49 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-journald.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-journald.service major:0 minor:33 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-resolved.service:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-resolved.service major:0 minor:34 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/lock:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/lock major:0 minor:32 fsType:tmpfs blockSize:0} /var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/user/1000:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/user/1000 major:0 minor:97 fsType:tmpfs blockSize:0} overlay_0-111:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/1c0d7a1ec5645f4872201979714a946c992d0660ea220cd376311b8a5d0e32a3 major:0 minor:111 fsType:overlay blockSize:0} overlay_0-142:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/b67a7f8774b5be2af432921edb1502a53fe2625b1c947679c1fab76a9175c982 major:0 minor:142 fsType:overlay blockSize:0} overlay_0-146:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/4f6aab343e53418c822237e822667e0a39df88f9e4fa72f68b19d099f5f81659 major:0 minor:146 fsType:overlay blockSize:0} overlay_0-148:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/8cb5df70228189415cb361a774a0b6b3db05cc154e9405f191a199056b85b9ab major:0 minor:148 fsType:overlay blockSize:0} overlay_0-164:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/3e64832e51198b12d8fdbc39006a651f25b39326523d57aaa75424f716056bec major:0 minor:164 fsType:overlay blockSize:0} overlay_0-172:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/1f9a8b6e8a04a55047857d3e28bfc8d80668a1dc68ddda229e79b2995648c56e major:0 minor:172 fsType:overlay blockSize:0} overlay_0-268:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/7dfc1aba4481afedc3e6edfd896318f178c36a3ff9ad00399af8954131b3f703 major:0 minor:268 fsType:overlay blockSize:0} overlay_0-51:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/d1bddd0ec3787cc41ce19d5359775b7da54cf31759140bedbc4106f067ad957c major:0 minor:51 fsType:overlay blockSize:0} overlay_0-52:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/85c16e669e9d253fdf817d866f11bc0962760604537a17ffceaa346b8eb10271 major:0 minor:52 fsType:overlay blockSize:0} overlay_0-55:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/dab511bac2a0c8cc1de937a3f9c6e00752d9fc1653f45973ba1448634f6a55df major:0 minor:55 fsType:overlay blockSize:0} overlay_0-57:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac major:0 minor:57 fsType:overlay blockSize:0} overlay_0-58:{mountpoint:/var/lib/docker/rootfs/overlayfs/f4baefbcba1268fe0a82977a7cedff67bd96a14d392e2a10d4e6a8cddce28bb6 major:0 minor:58 fsType:overlay blockSize:0} overlay_0-59:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/ef097efa20f1c72e0199e2e18f27a645978bfbbb7d0652900733bdaefaf7e3f6 major:0 minor:59 fsType:overlay blockSize:0} overlay_0-62:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/5e1fd048f6e6ca7de53ab4316766d17d7136ac629b04fdbc94565c0b152d1ab7 major:0 minor:62 fsType:overlay blockSize:0} overlay_0-64:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/292edc783ec8674216139b41c154883d7c70f18224a838bfc65824b6d6d75d6d major:0 minor:64 fsType:overlay blockSize:0} overlay_0-65:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/43316bc32c3be83cd0e68951e15be1d6e18843969a78c24d0865d58c2bf85ddd major:0 minor:65 fsType:overlay blockSize:0} overlay_0-66:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/5afa9bf74478995c890085427e3ddf22cd54589b2cc006757de908c491e0779f major:0 minor:66 fsType:overlay blockSize:0} overlay_0-68:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/2fb8b9d98dbc5dff71c4c28c27ba2f221be3074a558d49b121523619180ef521 major:0 minor:68 fsType:overlay blockSize:0} overlay_0-71:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/ea5db815002c68af72d43b85839e98907404d3aaee83c3f2ac1f1b6706bddf14 major:0 minor:71 fsType:overlay blockSize:0} overlay_0-72:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e346296caf6a0e56d78fba40a1f9bd091d0ab08af7a4ccab71521c27a099d19c major:0 minor:72 fsType:overlay blockSize:0} overlay_0-74:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/283493e33800462a020e04eed02b0a8dd7ac6928e176eebb17189c1ebe269870 major:0 minor:74 fsType:overlay blockSize:0} overlay_0-75:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/923faa7504b6f0d84642edc0937204e8ca1ebe998aeeb1ea840efd0162eb2435 major:0 minor:75 fsType:overlay blockSize:0} overlay_0-80:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/a1206e0d80bd5a714861c67883b5a05a70718a85cc8d4e03a3f4d565039c5613 major:0 minor:80 fsType:overlay blockSize:0} overlay_0-82:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/dde3310b8de44f2fb0910840dd9be7aba0ef2d023c74b62c003cc880bace7854 major:0 minor:82 fsType:overlay blockSize:0} overlay_0-85:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/3d00ffcfbc5af345eb36718c59e0b3f08de4ba941f68a2145bec07fafdb96488 major:0 minor:85 fsType:overlay blockSize:0} overlay_0-95:{mountpoint:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/52a6e16c2f83f5c159fe58379c24f228dafa150d3b461c28211d7e86074213a3 major:0 minor:95 fsType:overlay blockSize:0}]
+infra-cadvisor  | I0902 10:45:24.875546       1 manager.go:218] Machine: {Timestamp:2026-09-02 10:45:24.873703985 +0000 UTC m=+0.552795047 CPUVendorID:GenuineIntel NumCores:4 NumPhysicalCores:4 NumSockets:1 CpuFrequency:1840000 MemoryCapacity:4026093568 SwapCapacity:3197104128 MemoryByType:map[] NVMInfo:{MemoryModeCapacity:0 AppDirectModeCapacity:0 AvgPowerBudget:0} HugePages:[{PageSize:2048 NumPages:0}] MachineID:b284a1be2f0440d28077fd92691f9a0e SystemUUID:ec71eb50-ee6a-1920-0920-905047052944 BootID:37fa8ab2-eaf2-4a72-8151-4021cb5008dc Filesystems:[{Device:overlay_0-68 DeviceMajor:0 DeviceMinor:68 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-146 DeviceMajor:0 DeviceMinor:146 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/lock DeviceMajor:0 DeviceMinor:32 Capacity:5242880 Type:vfs Inodes:491466 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-journald.service DeviceMajor:0 DeviceMinor:33 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/getty@tty1.service DeviceMajor:0 DeviceMinor:49 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/user/1000 DeviceMajor:0 DeviceMinor:97 Capacity:402608128 Type:vfs Inodes:98293 HasInodes:true} {Device:/rootfs/run/credentials/systemd-resolved.service DeviceMajor:0 DeviceMinor:34 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/rootfs/tmp DeviceMajor:0 DeviceMinor:44 Capacity:2013048832 Type:vfs Inodes:1048576 HasInodes:true} {Device:/dev/mmcblk1p1 DeviceMajor:179 DeviceMinor:1 Capacity:1021394944 Type:vfs Inodes:0 HasInodes:true} {Device:overlay_0-62 DeviceMajor:0 DeviceMinor:62 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-95 DeviceMajor:0 DeviceMinor:95 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-172 DeviceMajor:0 DeviceMinor:172 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/systemd-resolved.service DeviceMajor:0 DeviceMinor:34 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:overlay DeviceMajor:0 DeviceMinor:57 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/dev/mmcblk1p2 DeviceMajor:179 DeviceMinor:2 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-71 DeviceMajor:0 DeviceMinor:71 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/run/lock DeviceMajor:0 DeviceMinor:32 Capacity:5242880 Type:vfs Inodes:491466 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev DeviceMajor:0 DeviceMinor:99 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm DeviceMajor:0 DeviceMinor:218 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:/run/credentials/systemd-journald.service DeviceMajor:0 DeviceMinor:33 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:overlay_0-72 DeviceMajor:0 DeviceMinor:72 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/rootfs/run/credentials/systemd-journald.service DeviceMajor:0 DeviceMinor:33 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:overlay_0-59 DeviceMajor:0 DeviceMinor:59 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-64 DeviceMajor:0 DeviceMinor:64 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/run/credentials/getty@tty1.service DeviceMajor:0 DeviceMinor:49 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run DeviceMajor:0 DeviceMinor:24 Capacity:402612224 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-142 DeviceMajor:0 DeviceMinor:142 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-51 DeviceMajor:0 DeviceMinor:51 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-85 DeviceMajor:0 DeviceMinor:85 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/lock DeviceMajor:0 DeviceMinor:32 Capacity:5242880 Type:vfs Inodes:491466 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-journald.service DeviceMajor:0 DeviceMinor:33 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/dev DeviceMajor:0 DeviceMinor:99 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:/rootfs/run/lock DeviceMajor:0 DeviceMinor:32 Capacity:5242880 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-148 DeviceMajor:0 DeviceMinor:148 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/run DeviceMajor:0 DeviceMinor:24 Capacity:402612224 Type:vfs Inodes:491466 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/user/1000 DeviceMajor:0 DeviceMinor:97 Capacity:402608128 Type:vfs Inodes:98293 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm DeviceMajor:0 DeviceMinor:218 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-75 DeviceMajor:0 DeviceMinor:75 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-111 DeviceMajor:0 DeviceMinor:111 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-164 DeviceMajor:0 DeviceMinor:164 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-58 DeviceMajor:0 DeviceMinor:58 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-52 DeviceMajor:0 DeviceMinor:52 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-65 DeviceMajor:0 DeviceMinor:65 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-268 DeviceMajor:0 DeviceMinor:268 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/rootfs/dev/shm DeviceMajor:0 DeviceMinor:25 Capacity:2013044736 Type:vfs Inodes:491466 HasInodes:true} {Device:/rootfs/run/credentials/getty@tty1.service DeviceMajor:0 DeviceMinor:49 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev DeviceMajor:0 DeviceMinor:99 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-55 DeviceMajor:0 DeviceMinor:55 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/run/credentials/getty@tty1.service DeviceMajor:0 DeviceMinor:49 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/tmp DeviceMajor:0 DeviceMinor:44 Capacity:2013048832 Type:vfs Inodes:1048576 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run DeviceMajor:0 DeviceMinor:24 Capacity:402612224 Type:vfs Inodes:491466 HasInodes:true} {Device:/run/user/1000 DeviceMajor:0 DeviceMinor:97 Capacity:402608128 Type:vfs Inodes:98293 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev/shm DeviceMajor:0 DeviceMinor:218 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-74 DeviceMajor:0 DeviceMinor:74 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-57 DeviceMajor:0 DeviceMinor:57 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/dev/shm DeviceMajor:0 DeviceMinor:218 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:/rootfs/run DeviceMajor:0 DeviceMinor:24 Capacity:402612224 Type:vfs Inodes:491466 HasInodes:true} {Device:overlay_0-66 DeviceMajor:0 DeviceMinor:66 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:overlay_0-82 DeviceMajor:0 DeviceMinor:82 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/rootfs/dev/shm DeviceMajor:0 DeviceMinor:25 Capacity:2013044736 Type:vfs Inodes:491466 HasInodes:true} {Device:/rootfs/run/user/1000 DeviceMajor:0 DeviceMinor:97 Capacity:402608128 Type:vfs Inodes:98293 HasInodes:true} {Device:overlay_0-80 DeviceMajor:0 DeviceMinor:80 Capacity:56414683136 Type:vfs Inodes:3522560 HasInodes:true} {Device:/rootfs/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/dev DeviceMajor:0 DeviceMinor:99 Capacity:67108864 Type:vfs Inodes:491466 HasInodes:true} {Device:/run/credentials/systemd-resolved.service DeviceMajor:0 DeviceMinor:34 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true} {Device:/var/lib/docker/rootfs/overlayfs/e46510ec9138b48cb51ec59f5486bd0a66d6631139fe257074993fe3564ea1ac/run/credentials/systemd-resolved.service DeviceMajor:0 DeviceMinor:34 Capacity:1048576 Type:vfs Inodes:1024 HasInodes:true}] DiskMap:map[179:0:{Name:mmcblk1 Major:179 Minor:0 Size:61865984000 Scheduler:mq-deadline} 179:256:{Name:mmcblk1boot0 Major:179 Minor:256 Size:4194304 Scheduler:mq-deadline} 179:512:{Name:mmcblk1boot1 Major:179 Minor:512 Size:4194304 Scheduler:mq-deadline}] NetworkDevices:[{Name:br-04772499dd40 MacAddress:72:0a:45:61:ec:0b Speed:10000 Mtu:1500} {Name:br-1f5f63e38030 MacAddress:c6:67:7b:77:b6:48 Speed:-1 Mtu:1500} {Name:br-25c6ec9da336 MacAddress:0e:84:60:23:34:e1 Speed:-1 Mtu:1500} {Name:br-2b7f3d337daa MacAddress:02:54:a7:3b:37:8c Speed:10000 Mtu:1500} {Name:br-3969ae1b9f43 MacAddress:7a:17:17:c6:ff:a4 Speed:10000 Mtu:1500} {Name:br-3f1176899ffe MacAddress:aa:3a:db:c1:0c:95 Speed:10000 Mtu:1500} {Name:br-9bc277e1b2ca MacAddress:6e:ca:bc:67:a9:0d Speed:-1 Mtu:1500} {Name:br-a236c353f1c5 MacAddress:76:32:67:bb:4b:25 Speed:10000 Mtu:1500} {Name:br-dac38811d73b MacAddress:76:33:3d:b1:cb:fd Speed:10000 Mtu:1500} {Name:br-fd5251857151 MacAddress:a6:29:8c:91:ee:e3 Speed:10000 Mtu:1500} {Name:pterodactyl0 MacAddress:d6:36:05:ea:77:a5 Speed:10000 Mtu:1500} {Name:tailscale0 MacAddress: Speed:-1 Mtu:1280} {Name:wlp1s0 MacAddress:50:eb:71:ec:6a:ee Speed:0 Mtu:1500}] Topology:[{Id:0 Memory:4026093568 HugePages:[{PageSize:2048 NumPages:0}] Cores:[{Id:0 Threads:[0] Caches:[{Id:0 Size:24576 Type:Data Level:1} {Id:0 Size:32768 Type:Instruction Level:1}] UncoreCaches:[] SocketID:0 BookID: DrawerID:} {Id:1 Threads:[1] Caches:[{Id:2 Size:24576 Type:Data Level:1} {Id:2 Size:32768 Type:Instruction Level:1}] UncoreCaches:[] SocketID:0 BookID: DrawerID:} {Id:2 Threads:[2] Caches:[{Id:4 Size:24576 Type:Data Level:1} {Id:4 Size:32768 Type:Instruction Level:1}] UncoreCaches:[] SocketID:0 BookID: DrawerID:} {Id:3 Threads:[3] Caches:[{Id:6 Size:24576 Type:Data Level:1} {Id:6 Size:32768 Type:Instruction Level:1}] UncoreCaches:[] SocketID:0 BookID: DrawerID:}] Caches:[] Distances:[10]}] CloudProvider:Unknown InstanceType:Unknown InstanceID:None}
+infra-cadvisor  | I0902 10:45:24.876793       1 manager.go:234] Version: {KernelVersion:6.12.107+deb13-amd64 ContainerOsVersion:Alpine Linux v3.22 DockerVersion: DockerAPIVersion: CadvisorVersion:v0.55.1 CadvisorRevision:f5bec374}
+infra-cadvisor  | I0902 10:45:24.877836       1 factory.go:55] Registering systemd factory
+infra-cadvisor  | I0902 10:45:24.878036       1 factory.go:222] Registration of the systemd container factory successfully
+infra-cadvisor  | I0902 10:45:24.879190       1 factory.go:220] Registration of the crio container factory failed: Get "http://%2Fvar%2Frun%2Fcrio%2Fcrio.sock/info": dial unix /var/run/crio/crio.sock: connect: no such file or directory
+infra-cadvisor  | I0902 10:45:24.895311       1 factory.go:148] Registering containerd factory
+infra-cadvisor  | I0902 10:45:24.895547       1 factory.go:222] Registration of the containerd container factory successfully
+infra-cadvisor  | I0902 10:45:24.983648       1 factory.go:362] Registering Docker factory
+infra-cadvisor  | I0902 10:45:24.983715       1 factory.go:222] Registration of the docker container factory successfully
+infra-cadvisor  | I0902 10:45:24.984419       1 factory.go:220] Registration of the podman container factory failed: failed to validate Podman info: response not present: Get "http://d/v1.0.0/info": dial unix /var/run/podman/podman.sock: connect: no such file or directory
+infra-cadvisor  | I0902 10:45:24.984661       1 factory.go:105] Registering Raw factory
+infra-cadvisor  | I0902 10:45:24.984719       1 manager.go:1211] Started watching for new ooms in manager
+infra-cadvisor  | I0902 10:45:24.988768       1 manager.go:351] Starting recovery of all containers
+infra-cadvisor  | W0902 10:45:24.995045       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.159363       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.163691       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.274058       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.290615       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.378368       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.395013       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.461015       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.482183       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.557660       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.570734       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.587755       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.661354       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.677827       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.691688       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.764863       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.777632       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.792215       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.871192       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.885410       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.902732       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.976106       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:25.991654       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:26.061018       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:26.077187       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | I0902 10:45:26.090350       1 manager.go:356] Recovery completed
+infra-cadvisor  | W0902 10:45:26.092980       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | I0902 10:45:26.179729       1 cadvisor.go:179] Starting cAdvisor version: v0.55.1-f5bec374 on port 8080
+infra-loki      | level=info ts=2026-09-02T10:45:26.548599424Z caller=main.go:146 msg="Starting Loki" version="(version=3.7.7, branch=release-3.7.x, revision=7a40404f)"
+infra-loki      | level=info ts=2026-09-02T10:45:26.550824109Z caller=main.go:147 msg="Loading configuration file" filename=/etc/loki/local-config.yaml
+infra-loki      | level=info ts=2026-09-02T10:45:26.559116292Z caller=server.go:397 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9095
+infra-loki      | level=info ts=2026-09-02T10:45:26.624794275Z caller=table_manager.go:300 index-store=tsdb-2024-01-01 msg="query readiness setup completed" duration=12.588µs distinct_users_len=0 distinct_users=
+infra-loki      | level=info ts=2026-09-02T10:45:26.625031336Z caller=shipper.go:165 index-store=tsdb-2024-01-01 msg="starting index shipper in RW mode"
+infra-loki      | level=info ts=2026-09-02T10:45:26.627773634Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:45:26.630447178Z caller=head_manager.go:313 index-store=tsdb-2024-01-01 component=tsdb-head-manager msg="loaded wals by period" groups=0
+infra-loki      | level=info ts=2026-09-02T10:45:26.630713278Z caller=manager.go:86 index-store=tsdb-2024-01-01 component=tsdb-manager msg="loaded leftover local indices" err=null successful=true buckets=0 indices=0 failures=0
+infra-loki      | level=info ts=2026-09-02T10:45:26.630911788Z caller=head_manager.go:313 index-store=tsdb-2024-01-01 component=tsdb-head-manager msg="loaded wals by period" groups=0
+infra-loki      | level=info ts=2026-09-02T10:45:26.78693598Z caller=worker.go:134 component=querier msg="Starting querier worker using query-scheduler and scheduler ring for addresses"
+infra-loki      | level=info ts=2026-09-02T10:45:26.811281791Z caller=mapper.go:47 msg="cleaning up mapped rules directory" path=/loki/rules-temp
+infra-loki      | level=info ts=2026-09-02T10:45:27.052645046Z caller=module_service.go:82 msg=starting module=cache-generation-loader
+infra-loki      | level=info ts=2026-09-02T10:45:27.052739376Z caller=module_service.go:82 msg=starting module=server
+infra-loki      | level=info ts=2026-09-02T10:45:27.056721434Z caller=module_service.go:82 msg=starting module=query-frontend-tripperware
+infra-loki      | level=info ts=2026-09-02T10:45:27.056865966Z caller=module_service.go:82 msg=starting module=memberlist-kv
+infra-loki      | level=info ts=2026-09-02T10:45:27.056994935Z caller=module_service.go:82 msg=starting module=query-scheduler-ring
+infra-loki      | level=info ts=2026-09-02T10:45:27.057258511Z caller=ring.go:390 msg="ring doesn't exist in KV store yet"
+infra-loki      | level=info ts=2026-09-02T10:45:27.057501723Z caller=module_service.go:82 msg=starting module=ring
+infra-loki      | level=info ts=2026-09-02T10:45:27.057598552Z caller=ring.go:390 msg="ring doesn't exist in KV store yet"
+infra-loki      | level=info ts=2026-09-02T10:45:27.057790462Z caller=module_service.go:82 msg=starting module=ingester-querier
+infra-loki      | level=info ts=2026-09-02T10:45:27.057886554Z caller=module_service.go:82 msg=starting module=store
+infra-loki      | level=info ts=2026-09-02T10:45:27.058019723Z caller=basic_lifecycler.go:324 msg="instance not found in the ring" instance=f4baefbcba12 ring=scheduler
+infra-loki      | level=info ts=2026-09-02T10:45:27.058046462Z caller=basic_lifecycler_delegates.go:63 msg="not loading tokens from file, tokens file path is empty"
+infra-loki      | level=info ts=2026-09-02T10:45:27.058570675Z caller=ringmanager.go:186 msg="waiting until scheduler is JOINING in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.058618227Z caller=ringmanager.go:190 msg="scheduler is JOINING in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.058752409Z caller=ringmanager.go:199 msg="waiting until scheduler is ACTIVE in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.058956107Z caller=module_service.go:82 msg=starting module=analytics
+infra-loki      | level=info ts=2026-09-02T10:45:27.111937189Z caller=module_service.go:82 msg=starting module=compactor
+infra-loki      | level=info ts=2026-09-02T10:45:27.112217578Z caller=ring.go:390 msg="ring doesn't exist in KV store yet"
+infra-loki      | level=info ts=2026-09-02T10:45:27.112430989Z caller=module_service.go:82 msg=starting module=ingester
+infra-loki      | level=info ts=2026-09-02T10:45:27.112511318Z caller=ingester.go:571 component=ingester msg="recovering from checkpoint"
+infra-loki      | level=info ts=2026-09-02T10:45:27.112592472Z caller=checkpoint.go:549 msg="tmp checkpoint cleanup starting"
+infra-loki      | level=info ts=2026-09-02T10:45:27.112947302Z caller=checkpoint.go:554 msg="tmp checkpoint cleanup done" duration=235.974µs success=true
+infra-loki      | level=info ts=2026-09-02T10:45:27.112929901Z caller=module_service.go:82 msg=starting module=distributor
+infra-loki      | level=info ts=2026-09-02T10:45:27.113133386Z caller=recovery.go:45 component=ingester msg="no checkpoint found, treating as no-op"
+infra-loki      | level=info ts=2026-09-02T10:45:27.113307769Z caller=basic_lifecycler.go:324 msg="instance not found in the ring" instance=f4baefbcba12 ring=compactor
+infra-loki      | level=info ts=2026-09-02T10:45:27.113337283Z caller=basic_lifecycler_delegates.go:63 msg="not loading tokens from file, tokens file path is empty"
+infra-loki      | level=error ts=2026-09-02T10:45:27.113332721Z caller=ratestore.go:110 msg="error getting ingester clients" err="empty ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.113585308Z caller=module_service.go:82 msg=starting module=rule-evaluator
+infra-loki      | level=info ts=2026-09-02T10:45:27.114155374Z caller=basic_lifecycler.go:324 component=distributor msg="instance not found in the ring" instance=f4baefbcba12 ring=distributor
+infra-loki      | level=info ts=2026-09-02T10:45:27.118077817Z caller=ingester.go:587 component=ingester msg="recovered WAL checkpoint recovery finished" elapsed=5.582438ms errors=false
+infra-loki      | level=info ts=2026-09-02T10:45:27.11819416Z caller=ingester.go:593 component=ingester msg="recovering from WAL"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119066028Z caller=compactor.go:420 msg="waiting until compactor is JOINING in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119132731Z caller=compactor.go:424 msg="compactor is JOINING in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119395131Z caller=compactor.go:434 msg="waiting until compactor is ACTIVE in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119654282Z caller=ring.go:390 component=distributor msg="ring doesn't exist in KV store yet"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119778688Z caller=ingester.go:609 component=ingester msg="WAL segment recovery finished" elapsed=7.287822ms errors=false
+infra-loki      | level=info ts=2026-09-02T10:45:27.119843829Z caller=ingester.go:557 component=ingester msg="closing recoverer"
+infra-loki      | level=info ts=2026-09-02T10:45:27.119875693Z caller=ingester.go:565 component=ingester msg="WAL recovery finished" time=7.386601ms
+infra-loki      | level=info ts=2026-09-02T10:45:27.12017172Z caller=lifecycler.go:694 component=ingester msg="not loading tokens from file, tokens file path is empty"
+infra-loki      | level=info ts=2026-09-02T10:45:27.120390105Z caller=wal.go:173 msg=started component=wal
+infra-loki      | level=info ts=2026-09-02T10:45:27.120676607Z caller=ingester.go:778 component=ingester msg="sleeping for initial delay before starting periodic flushing" delay=8.067278474s
+infra-loki      | level=info ts=2026-09-02T10:45:27.120840765Z caller=module_service.go:82 msg=starting module=ruler
+infra-loki      | level=info ts=2026-09-02T10:45:27.120900593Z caller=ruler.go:536 msg="ruler up and running"
+infra-loki      | level=info ts=2026-09-02T10:45:27.120905281Z caller=lifecycler.go:721 component=ingester msg="instance not found in ring, adding with no tokens" ring=ingester
+infra-loki      | level=info ts=2026-09-02T10:45:27.121454495Z caller=lifecycler.go:562 component=ingester msg="auto-joining cluster after timeout" ring=ingester
+infra-loki      | level=info ts=2026-09-02T10:45:27.164432411Z caller=ringmanager.go:203 msg="scheduler is ACTIVE in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.164745026Z caller=module_service.go:82 msg=starting module=query-scheduler
+infra-loki      | level=info ts=2026-09-02T10:45:27.165191398Z caller=module_service.go:82 msg=starting module=querier
+infra-loki      | level=info ts=2026-09-02T10:45:27.165605031Z caller=module_service.go:82 msg=starting module=query-frontend
+infra-loki      | level=info ts=2026-09-02T10:45:27.28266613Z caller=compactor.go:438 msg="compactor is ACTIVE in the ring"
+infra-loki      | level=info ts=2026-09-02T10:45:27.282953057Z caller=loki.go:615 msg="Loki started" startup_time=1.803863337s
+infra-loki      | level=info ts=2026-09-02T10:45:30.166322465Z caller=scheduler.go:658 msg="this scheduler is in the ReplicationSet, will now accept requests."
+infra-loki      | level=info ts=2026-09-02T10:45:30.166589315Z caller=worker.go:235 component=querier msg="adding connection" addr=172.18.0.2:9095
+infra-loki      | level=info ts=2026-09-02T10:45:32.283173569Z caller=compactor.go:497 msg="this instance has been chosen to run the compactor, starting compactor"
+infra-loki      | level=info ts=2026-09-02T10:45:32.283597252Z caller=tables_manager.go:70 msg="waiting 10m0s for ring to stay stable and previous compactions to finish before starting compactor"
+infra-loki      | level=info ts=2026-09-02T10:45:37.166855846Z caller=frontend_scheduler_worker.go:106 msg="adding connection to scheduler" addr=172.18.0.2:9095
+infra-cadvisor  | W0902 10:45:56.318106       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:45:57.121454173Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:45:57.14430676Z caller=recalculate_owned_streams.go:63 msg="detected ring changes, re-evaluating streams ownership"
+infra-loki      | level=info ts=2026-09-02T10:45:57.144411891Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:45:57.303562       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:45:58.179256       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:02.335227       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:03.902849       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:05.661407       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:07.095297       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:07.386760       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:08.299256       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:13.143354       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:15.416843       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:16.399139       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:16.817793       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:17.719866       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:19.273894       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:19.466222       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:19.531371       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:19.784469       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:21.451006       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:21.488981       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:22.201055       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:22.399306       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:22.974983       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:24.025582       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:24.365042       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:24.943011       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:46:26.628949596Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:46:27.120518841Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:46:27.12084412Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:46:37.337415       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:37.952239       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:38.566519       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:38.930768       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:40.834974       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:41.299868       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:45.750739       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:50.998824       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:51.311334       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:53.140225       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:46:56.259170       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:46:57.12115656Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:46:57.12140121Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:46:59.143392       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:03.645298       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:03.809056       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:05.224110       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:05.945295       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:06.338419       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:09.874746       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:12.205438       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:14.279193       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:14.790095       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:15.130900       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:15.398025       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:15.545367       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:17.421780       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:21.394487       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:21.612247       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:25.248985       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:26.267390       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:47:26.628030264Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:47:27.121867795Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:47:27.122092807Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:47:28.068442       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:32.332193       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:33.137088       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:34.670754       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:39.603217       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:42.165556       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:42.188061       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:44.231439       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:45.265085       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:46.485334       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:53.159596       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:53.315319       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:55.910796       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:47:57.120799373Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:47:57.120892003Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:47:58.011993       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:47:58.917567       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:02.667607       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:03.500863       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:04.202911       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:04.357021       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:05.881159       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:06.850334       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:08.263642       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:08.917939       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:09.680709       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:10.528698       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:10.603551       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:15.048924       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:15.303126       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:17.206172       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:18.044940       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:22.561521       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:48:26.62884118Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:48:27.120841258Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:48:27.121032705Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:48:27.741472       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:28.650075       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:29.194000       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:29.850208       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:31.760411       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:33.365674       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:33.441379       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:36.998553       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:41.323184       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:41.874565       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:41.934835       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:43.075471       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:46.050552       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:47.166222       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:53.338377       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:54.517983       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:55.993925       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:56.470731       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:48:57.120828803Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:48:57.121053626Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:48:58.455363       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:48:59.397216       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:00.214092       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:00.929391       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:01.199937       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:01.822828       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:02.276696       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:07.022461       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:09.635097       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:10.654007       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:11.194620       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:15.290931       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:18.251321       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:19.365652       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:23.883948       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:24.154227       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:24.213359       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:25.998539       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:49:26.629001618Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:49:27.120762685Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:49:27.120974258Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:49:28.490354       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:28.667318       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:30.510069       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:30.763769       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:31.452408       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:37.682169       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:39.263816       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:40.184999       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:40.524503       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:43.224658       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:45.317018       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:48.267493       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:49.350616       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:49.781421       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:52.435772       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:54.359851       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:49:57.120464265Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:49:57.120811557Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:49:57.766816       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:58.812432       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:59.293772       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:49:59.296235       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:00.121295       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:00.264514       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:03.133850       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:09.034757       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:10.951417       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:14.924919       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:15.558045       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:15.607835       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:16.456933       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:19.719543       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:21.986490       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:25.952873       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:26.549492       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:50:26.627104137Z caller=table_manager.go:239 index-store=tsdb-2024-01-01 msg="syncing tables"
+infra-loki      | level=info ts=2026-09-02T10:50:26.627309073Z caller=table_manager.go:300 index-store=tsdb-2024-01-01 msg="query readiness setup completed" duration=9.888µs distinct_users_len=0 distinct_users=
+infra-loki      | level=info ts=2026-09-02T10:50:26.629502556Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:50:27.121002747Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:50:27.121138253Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:50:27.121524635Z caller=checkpoint.go:712 msg="starting checkpoint"
+infra-loki      | level=info ts=2026-09-02T10:50:27.122275022Z caller=checkpoint.go:336 msg="attempting checkpoint for" dir=/loki/wal/checkpoint.000000
+infra-loki      | level=info ts=2026-09-02T10:50:27.122328999Z caller=checkpoint.go:549 msg="tmp checkpoint cleanup starting"
+infra-loki      | level=info ts=2026-09-02T10:50:27.122504221Z caller=checkpoint.go:554 msg="tmp checkpoint cleanup done" duration=146.657µs success=true
+infra-cadvisor  | W0902 10:50:32.065316       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:34.738588       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:35.071004       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:36.055752       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:36.769106       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:37.221483       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:37.574688       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:41.846877       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:42.837226       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:46.022492       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:46.463272       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:47.244099       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:48.383082       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:48.765514       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:49.119804       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:49.241837       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:50.360616       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:50:51.190805       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:50:57.120845942Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:50:57.121060853Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:51:00.583092       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:02.033170       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:03.069016       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:04.518804       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:04.554610       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:05.465492       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:09.168809       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:11.253683       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:14.662886       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:17.261087       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:17.543169       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:19.956993       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:24.548862       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:24.965296       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:25.599302       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:51:25.881284128Z caller=flush.go:305 component=ingester msg="flushing stream" user=fake fp=3e54bd56ee6a61e7 immediate=false num_chunks=1 total_comp="2.3 kB" avg_comp="2.3 kB" total_uncomp="2.3 kB" avg_uncomp="2.3 kB" idle=1 labels="{container=\"infra-promtail\", service_name=\"infra-promtail\"}"
+infra-loki      | level=info ts=2026-09-02T10:51:26.629021831Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:51:27.12046517Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:51:27.120660755Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:51:29.791043       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:31.281597       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:32.278821       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:35.045461       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:35.400896       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:35.458507       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:37.666440       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:37.699275       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:37.866059       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:37.917140       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:38.114662       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:40.387378       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:43.486912       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:44.180877       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:44.692657       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:49.132059       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:51.802867       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:51.931282       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:51:56.211477       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:51:57.120888287Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:51:57.121123161Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:52:00.098075       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:06.403632       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:07.111138       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:07.119829       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:10.998396       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:12.354111       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:14.746483       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:16.306249       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:16.616641       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:17.275658       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:18.897791       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:19.908322       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:20.235519       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:21.743712       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:22.044520       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:22.809837       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:23.524856       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:25.008072       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:52:26.628524865Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+infra-loki      | level=info ts=2026-09-02T10:52:27.120703077Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:52:27.120916488Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:52:27.690428       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:28.181801       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:29.291669       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:30.677064       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:36.099704       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:37.436723       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:38.949536       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:49.002808       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:51.129371       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:51.499530       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:51.598690       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:52.656672       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:52:53.301997       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-loki      | level=info ts=2026-09-02T10:52:57.120708281Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+infra-loki      | level=info ts=2026-09-02T10:52:57.120938293Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+infra-cadvisor  | W0902 10:52:57.336519       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:53:01.343236       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
+infra-cadvisor  | W0902 10:53:03.823513       1 handler.go:424] Cannot read smaps files for any PID from CONTAINER
