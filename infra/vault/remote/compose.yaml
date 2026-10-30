@@ -2,16 +2,20 @@ services:
   vault:
     image: hashicorp/vault:2.0.1
     container_name: vault-unseal
-    user: "100:100"
+    user: "0:0"
     cap_add: ["IPC_LOCK"]
-    entrypoint: ["vault"]
-    command: ["server", "-config=/vault/config/vault.hcl"]
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - 'chown 100:100 /vault/data; chmod 700 /vault/data; exec su-exec 100:100 vault server -config=/vault/config/vault.hcl'
     ports:
       - "${VAULT_VPN_IP:?Set VAULT_VPN_IP to the remote VPN interface address}:8200:8200"
     volumes:
-      - /var/lib/vault-unseal:/vault/data
+      - vault-data:/vault/data
       - /etc/vault-unseal:/vault/private:ro
       - /etc/vault-unseal/vault.hcl:/vault/config/vault.hcl:ro
       - /var/log/vault-unseal:/vault/audit
     restart: unless-stopped
+
+volumes:
+  vault-data:
 

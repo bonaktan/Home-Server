@@ -2,6 +2,8 @@
 
 infra/registry/auth/*
 infra/certs/*.pem
+infra/certs/root/
+infra/certs/internal/
 
 .ansible/
 ansible/password.txt

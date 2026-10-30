@@ -13,6 +13,8 @@ networks:
     name: pterodactyl_nw
 
 volumes:
+  vault-data:
+    driver: local
   registry-data:
     driver: local
   postgresql-data:
@@ -31,13 +33,13 @@ services:
     profiles: ["vault"]
     image: hashicorp/vault:2.0.1
     container_name: infra-vault
-    user: "100:100"
+    user: "0:0"
     cap_add: ["IPC_LOCK"]
     entrypoint: ["/bin/sh", "-ec"]
     command:
-      - 'export VAULT_TOKEN="$$(cat /vault/private/transit-token)"; exec vault server -config=/vault/config/vault.hcl'
+      - 'chown 100:100 /vault/data; chmod 700 /vault/data; export VAULT_TOKEN="$$(cat /vault/private/transit-token)"; exec su-exec 100:100 vault server -config=/vault/config/vault.hcl'
     volumes:
-      - /var/lib/vault-home:/vault/data
+      - vault-data:/vault/data
       - /etc/vault-home:/vault/private:ro
       - /etc/vault-home/vault.hcl:/vault/config/vault.hcl:ro
       - /var/log/vault-home:/vault/audit
@@ -76,14 +78,16 @@ services:
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./infra/certs:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
-      - ./infra/certs:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
-      - ./infra/certs:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
-      - ./infra/certs:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
+      - ${VAULT_NGINX_CA_FILE:-./infra/certs/internal/fullchain.pem}:/etc/nginx/vault-primary-ca.crt:ro
+      - ./infra/certs/root:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
+      - ./infra/certs/root:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
+      - ./infra/certs/internal:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
+      - ./infra/certs/internal:/etc/letsencrypt/archive/internal.bonnybonnybonaktan.xyz:ro
       - static-website-data:/var/www:ro
     networks:
       - shared_infra_net
       - pterodactyl
+      - vault_clients
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:
