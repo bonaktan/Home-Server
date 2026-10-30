@@ -1,4 +1,7 @@
 networks:
+  vault_clients:
+    name: home_vault_clients
+    driver: bridge
   shared_infra_net:
     driver: bridge
   infra_services:
@@ -24,6 +27,23 @@ volumes:
     driver: local
 
 services:
+  vault:
+    profiles: ["vault"]
+    image: hashicorp/vault:2.0.1
+    container_name: infra-vault
+    user: "100:100"
+    cap_add: ["IPC_LOCK"]
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - 'export VAULT_TOKEN="$$(cat /vault/private/transit-token)"; exec vault server -config=/vault/config/vault.hcl'
+    volumes:
+      - /var/lib/vault-home:/vault/data
+      - /etc/vault-home:/vault/private:ro
+      - /etc/vault-home/vault.hcl:/vault/config/vault.hcl:ro
+      - /var/log/vault-home:/vault/audit
+    networks:
+      - vault_clients
+    restart: unless-stopped
   ##################################################################
   # Shared Cloudflare/nginx
   ##################################################################

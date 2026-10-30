@@ -177,7 +177,7 @@ iptables -P OUTPUT  ACCEPT
 iptables -A INPUT -i lo -j ACCEPT -m comment --comment "Accept Localhost"
 iptables -A INPUT ! -i lo -s 127.0.0.0/8 -j DROP -m comment --comment "Anti Loopback Spoofing"
 
-iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT -m comment --comment "Allow Established Rules"
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT -m comment --comment "Allow Established Rules"z
 iptables -A INPUT -m conntrack --ctstate INVALID -j DROP -m comment --comment "Block Malformed Packets"
 
 iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s -j ACCEPT -m comment --comment "Allow ICMP Pings at 1 request/second"
