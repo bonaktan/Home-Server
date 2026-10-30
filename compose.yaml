@@ -1,7 +1,11 @@
 networks:
   infra_services:
     driver: bridge
-  
+
+volumes:
+  observ-grafana-data:
+    driver: local
+
 services:
   ##################################################################
   # Home Networking
@@ -177,3 +181,39 @@ services:
         limits: {cpus: "0.25", memory: 160M}
         reservations: {cpus: "0.1", memory: 64M}
     restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: infra-grafana
+    expose:
+      - "3000"
+    environment:      
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_PROTOCOL=http
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
+      - GOGC=50
+      - GOMEMLIMIT=550MiB
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - observ-grafana-data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - infra_services
+    depends_on:
+      - prometheus
+      - loki
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-grafana"
+    deploy:
+      resources:
+        limits: {cpus: "0.5", memory: 640M}
+        reservations: {cpus: "0.25", memory: 320M}
+    restart: always
+
