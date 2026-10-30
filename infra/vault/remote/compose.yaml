@@ -6,13 +6,17 @@ services:
     cap_add: ["IPC_LOCK"]
     entrypoint: ["/bin/sh", "-ec"]
     command:
-      - 'chown 100:100 /vault/data; chmod 700 /vault/data; exec su-exec 100:100 vault server -config=/vault/config/vault.hcl'
+      - 'if ! su-exec 100:100 test -f /vault/private/vault.hcl || ! su-exec 100:100 test -s /vault/private/vault.hcl || ! su-exec 100:100 test -r /vault/private/vault.hcl; then echo "Missing, empty, or unreadable /etc/vault-unseal/vault.hcl; copy and configure vault.hcl.example on the remote host" >&2; exit 1; fi; chown 100:100 /vault/data; chmod 700 /vault/data; exec su-exec 100:100 vault server -config=/vault/private/vault.hcl'
     ports:
       - "${VAULT_VPN_IP:?Set VAULT_VPN_IP to the remote VPN interface address}:8200:8200"
     volumes:
       - vault-data:/vault/data
-      - /etc/vault-unseal:/vault/private:ro
-      - /etc/vault-unseal/vault.hcl:/vault/config/vault.hcl:ro
+      - type: bind
+        source: /etc/vault-unseal
+        target: /vault/private
+        read_only: true
+        bind:
+          create_host_path: false
       - /var/log/vault-unseal:/vault/audit
     restart: unless-stopped
 

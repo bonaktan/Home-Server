@@ -37,11 +37,15 @@ services:
     cap_add: ["IPC_LOCK"]
     entrypoint: ["/bin/sh", "-ec"]
     command:
-      - 'chown 100:100 /vault/data; chmod 700 /vault/data; export VAULT_TOKEN="$$(cat /vault/private/transit-token)"; exec su-exec 100:100 vault server -config=/vault/config/vault.hcl'
+      - 'if ! su-exec 100:100 test -f /vault/private/vault.hcl || ! su-exec 100:100 test -s /vault/private/vault.hcl || ! su-exec 100:100 test -r /vault/private/vault.hcl; then echo "Missing, empty, or unreadable /etc/vault-home/vault.hcl; copy and configure vault.hcl.example on the home host" >&2; exit 1; fi; chown 100:100 /vault/data; chmod 700 /vault/data; export VAULT_TOKEN="$$(cat /vault/private/transit-token)"; exec su-exec 100:100 vault server -config=/vault/private/vault.hcl'
     volumes:
       - vault-data:/vault/data
-      - /etc/vault-home:/vault/private:ro
-      - /etc/vault-home/vault.hcl:/vault/config/vault.hcl:ro
+      - type: bind
+        source: /etc/vault-home
+        target: /vault/private
+        read_only: true
+        bind:
+          create_host_path: false
       - /var/log/vault-home:/vault/audit
     networks:
       - vault_clients
