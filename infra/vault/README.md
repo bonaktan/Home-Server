@@ -13,9 +13,7 @@ This is an opt-in, single-node deployment on each machine, with no HA. The remot
 
 Copy `remote/compose.yaml` to the remote machine in its own directory. On each host create the private configuration and audit directories with restrictive permissions. Copy the respective `vault.hcl.example` to `/etc/vault-unseal/vault.hcl` or `/etc/vault-home/vault.hcl`, replace `REMOTE_VPN_NAME` with the resolvable VPN DNS name, and install `server.crt` and `server.key` in the same directory. On the home host also install the remote server's CA as `/etc/vault-home/remote-ca.crt`. The primary server certificate and key are under `/etc/vault-home`; its client CA must be distributed separately. Ensure the Vault process can read the files and write its data volume and `/vault/audit` directory. Vault's Docker image normally uses UID/GID 100:100; verify this for the pinned image and set ownership accordingly. Keep private keys and the token readable only by the Vault service and host administrators.
 
-Raft with `disable_mlock = true` requires encrypted swap or swap disabled: Vault cannot lock its entire memory in this mode. Each Compose project uses its own named `vault-data` Docker volume. Startup sets the volume root to UID/GID 100:100 and mode 0700 before dropping privileges. Never remove these volumes or run `docker compose down -v` during ordinary shutdown or upgrade.
-
-If either Vault was previously initialized using `/var/lib/vault-home` or `/var/lib/vault-unseal`, switching to a new volume does not move the existing Raft data. Before changing mounts, take and verify an encrypted snapshot, stop the affected Vault, and migrate its data to the corresponding new volume or restore the snapshot using the recovery procedure below. Verify the recovered Vault before retiring the original data. Never initialize an empty replacement volume as if it contained the old Vault.
+Raft with `disable_mlock = true` requires encrypted swap or swap disabled: Vault cannot lock its entire memory in this mode. The home and remote data directories are `/var/lib/vault-home` and `/var/lib/vault-unseal`; create the respective directory on each host, owned by UID/GID 100:100 with mode 0700. Never remove these directories as part of ordinary shutdown or upgrade.
 
 On the remote host, set `VAULT_VPN_IP` to its actual VPN interface IP and start the service:
 
@@ -46,18 +44,6 @@ vault secrets enable -path=secret kv-v2
 vault secrets enable transit
 vault auth enable approle
 ```
-
-## Internal web UI
-
-The primary template enables the UI. If `/etc/vault-home/vault.hcl` was copied before this change, set `ui = true` in that file and restart the primary after confirming the remote Transit seal is available. Install the CA that issued the primary's `vault` certificate as `/etc/vault-home/primary-ca.crt`, readable by nginx, and set `VAULT_NGINX_CA_FILE=/etc/vault-home/primary-ca.crt` in the Compose environment or `.env`. The certificate must verify for DNS name `vault`; nginx verifies it on every upstream connection. Until the CA is configured, nginx uses the temporary internal web certificate as a fallback trust file so other sites can start; the Vault upstream will fail verification unless its certificate is trusted by that file.
-
-Point `vault.internal.bonnybonnybonaktan.xyz` in internal DNS at the home server and ensure nginx's internal certificate covers that name. The base Compose stack uses the temporary self-signed certificate in `infra/certs/internal`; browsers will warn unless they trust it. Production uses the certificate mounted by `compose.production.yaml`. The route permits `192.168.1.0/24`, matching the existing pgAdmin route; adjust the allowlist in `infra/nginx/conf.d/vault.conf` if the authorized LAN differs. Do not add a public Cloudflare route. After the primary CA and nginx certificates are in place, recreate nginx and start Vault:
-
-```sh
-docker compose --profile vault up -d nginx vault
-```
-
-Include `-f compose.yaml -f compose.production.yaml` when using the production certificate mounts. Recreate nginx after changing `VAULT_NGINX_CA_FILE` so Docker remounts the selected file. Visit `https://vault.internal.bonnybonnybonaktan.xyz/ui/` from the authorized LAN. Vault authentication still applies; nginx can reach the full Vault API as well as the UI, so protect the LAN and nginx host accordingly.
 
 Both audit directories must already exist and be writable. Protect, monitor, rotate and ship audit logs to a separate protected destination. File audit logs can contain sensitive metadata. Vault refuses requests when every enabled audit device is unavailable, so alert on write errors and full disks. Rotate by moving the file and signaling Vault to reopen it according to the Vault audit documentation; do not truncate an active file. Revoke initial root tokens after establishing and testing separately held administrative access and recovery procedures.
 
