@@ -8,3 +8,5 @@ ansible/password.txt
 ansible/envvars.yaml
 
 infra/pihole/*
+
+__pycache__
