@@ -1,0 +1,7 @@
+#!/bin/sh
+# Read the current log without consuming shared history.
+LOGFILE=/var/log/apt/listchanges.log
+if [ -s "$LOGFILE" ]; then
+    printf '%s\n' '=== Recent package changes ==='
+    tail -n 100 "$LOGFILE"
+fi

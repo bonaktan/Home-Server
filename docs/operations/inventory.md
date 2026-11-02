@@ -14,7 +14,9 @@ PostgreSQL and MariaDB are shared engines. The prior investigation identified IT
 
 ## Second server
 
-Identity, OS, interfaces, independent workloads, services, mounts, backup storage, access and local collection are not yet verified. The [hardware snapshot](../../new_server_hardware.md) is planning context, not current-state evidence.
+Read-only SSH on 2026-11-02 identified alias `aki-server-vpn` as `akihiko`, Debian 13.7, kernel `6.12.113+deb13-amd64`, Intel i5-3230M. The [hardware snapshot](../../new_server_hardware.md) provides additional historical context. Independent running Compose projects include `nextcloud`, `aki`, `skybridge-airways` and `remote`; `remote` includes a container named `vault-unseal`. The purpose and dependencies of that container have not been established.
+
+A running `home-server` project uses `/srv/Home-Server/compose.yaml` and includes Grafana, Prometheus, node-exporter, cAdvisor, Loki, Promtail and Pi-hole. Its Grafana volume is `home-server_observ-grafana-data`. The owner confirmed that the existing second-server observability stack can be cleared for this refactor. Identify its exact resources and dependencies before removal; that confirmation does not cover Pi-hole, unrelated services or independent workloads. The replacement must still meet its persistence, access and validation gates. A container list alone does not establish local collection or any service's authority. Other named volumes include `remote_vault-data`, `skybridge-airways_skybridge_nginx_logs`, `skybridge-airways_skybridge_postgres_data` and `immich_model-cache`, as well as anonymous volumes. Inventory all mounts, interfaces, schedules, backup storage, access and persistent telemetry before adoption.
 
 ## Gate and outstanding evidence
 
