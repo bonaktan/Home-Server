@@ -1,0 +1,3 @@
+---
+# The initial preflight uses ansible-core only; pin collections when roles require them.
+collections: []

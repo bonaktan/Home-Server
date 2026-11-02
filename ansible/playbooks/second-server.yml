@@ -1,0 +1,19 @@
+---
+# Read-only enrollment preflight. Service roles remain gated and are not installed.
+- name: Inspect enrolled second server
+  hosts: second_server
+  gather_facts: true
+  become: false
+  tasks:
+    - name: Reject unexpected inventory or host identity
+      ansible.builtin.assert:
+        that:
+          - inventory_hostname == 'aki-server-vpn'
+          - ansible_facts.hostname == 'akihiko'
+          - ansible_facts.os_family == 'Debian'
+          - ansible_facts.distribution_major_version == '13'
+        fail_msg: Host identity or OS does not match the enrolled second server.
+        success_msg: Enrolled second-server identity and OS match.
+    - name: Report that service application is not enabled
+      ansible.builtin.debug:
+        msg: Observability and backup-storage roles remain subject to inventory and recovery gates.

@@ -7,7 +7,7 @@ Read-only Atom inspection on 2026-11-02 found these paths:
 | Scope | Observed files or units | Remaining evidence |
 | --- | --- | --- |
 | ITskolar | `/srv/ITskolar-System/.github/workflows/docker-image.yml`; `compose.yaml`, `compose.production.yaml`, `compose.staging.yaml` under that directory | Repository/workflow IDs, refs, owner ID, package access, production contract, migration history and any other deployment writers. |
-| Skybridge | `/srv/Skybridge-Airways/.github/workflows/deploy.yml`; `/srv/Skybridge-Airways/compose.yaml` | Actual migration files/history, data ownership, repository IDs and deployment writers; preserve its local engine until verified transfer. |
+| Skybridge | `/srv/Skybridge-Airways/.github/workflows/deploy.yml`; `/srv/Skybridge-Airways/compose.yaml` and `compose.production.yaml`; `sql/V1__Initial.sql`, `sql/V2__Forgotten-Entries.sql`, and `sql/V3__Seatmap-Updates.sql` under that directory | Observed on `aki-server-vpn` on 2026-11-02; applied migration history, data ownership, repository IDs and all deployment writers remain unverified. Preserve its local engine until verified transfer. |
 | Runners | `actions.runner.PUP-ITskolar.bonny-server.service`; `actions.runner.RHES-Staff.bonny-server.service` | Registrations, all repositories/workflows using them and tested restricted replacement before suspension/retirement. |
 | Certificates and DHCP | No exhaustive inventory yet. | Exact Certbot installation, root/user schedules, renewal hooks and credentials ownership; router configuration, leases and rollback access. |
 | Provider | No provider-managed policy inventory yet. | Exact R2/KMS/GitHub policies, retention and independently administered recovery access. |

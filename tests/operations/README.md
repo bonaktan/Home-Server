@@ -1,0 +1,7 @@
+# Operations tests
+
+Run `python3 -m unittest discover -s tests/operations -p 'test_*.py'` on Debian with Python 3. The package-reporting fixture additionally uses `apt-listchanges`, `dpkg-deb` and `setsid`; it skips if the Debian packaging tools are unavailable. It builds a disposable package in a temporary directory and never installs it. The terminal test uses a local pseudo-terminal. No test should use production keys, send real notifications or stop production services.
+
+These tests currently cover the read-only host entry point, package filter and synthetic APT hook, and advisory size-state transitions. They do not establish the full Debian upgrade/privacy gate, deployed log rotation, actual backup collection, persistent alerts, access control or any restore. Add isolated fixtures and versioned evidence for the remaining design gates before enabling operations.
+
+The backup status classifier reads one JSON object on stdin: `budget_bytes`, `used_bytes`, `observed_at`, `now`, `max_age_seconds` and `last_known`. Times are integer Unix seconds. Unknown readings are `null`; `last_known` is `ok`, `warning`, `exceeded` or `unknown`. Its JSON output includes the current `state` and the `last_known` state to persist. The collector must safely persist and supply that latter value, report stale observations separately, and measure destination usage and filesystem/provider capacity. The classifier neither collects nor persists observations, sends alerts, caps uploads, prunes data nor stops services.
