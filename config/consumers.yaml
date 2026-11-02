@@ -1,0 +1,3 @@
+# Enrollment requires actual consumer interfaces and verified provisioner/migration owners.
+enabled: false
+consumers: {}

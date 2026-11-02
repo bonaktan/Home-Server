@@ -1,0 +1,20 @@
+# No destination is enrolled or verified; this file does not start backup jobs.
+enabled: false
+capture_interval_hours: 6
+normal_recovery_point_hours: 24
+backup_failure: continue_writes_and_alert
+secret_publication: require_verified_copies_at_both_destinations
+advisory_thresholds:
+  warn_percent: 80
+  exceeded_percent: 100
+  clear_below_percent: 75
+  stale_observation: unknown
+  enforce_upload_limit: false
+destinations:
+  r2:
+    enrolled: false
+    advisory_bytes: null
+  second_server:
+    enrolled: false
+    advisory_bytes: null
+datasets: {}

@@ -1,0 +1,6 @@
+# Deny submissions until real repository, workflow, owner and epoch evidence is enrolled.
+enabled: false
+host: main
+epoch: null
+owner_numeric_id: null
+repositories: {}

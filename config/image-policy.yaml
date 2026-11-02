@@ -1,0 +1,14 @@
+# Policy intent only. No automatic update is enabled by this file.
+platform: linux/amd64
+enabled: false
+scan_interval: daily
+unknown_compatibility: defer
+classes:
+  central: compatible_only
+  database_major_or_migration: alert_only
+  second_observability: compatible_only
+  second_backup_storage: alert_only
+  external_and_pterodactyl_workloads: alert_only
+# Per-service deployed digest, discovery reference, release boundary, readiness
+# and recovery evidence must be established before enrollment.
+services: {}

@@ -1,3 +1,4 @@
+import os
 import subprocess
 import unittest
 from pathlib import Path
@@ -16,6 +17,19 @@ class HostEntrypointTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertIn("Host:", result.stdout)
         self.assertIn("Inventory and readiness gates:", result.stdout)
+
+    def test_inspection_does_not_echo_environment(self):
+        env = dict(os.environ, HOME_SERVER_TEST_SECRET="do-not-log-fixture-marker")
+        result = subprocess.run(["bash", str(ROOT / "setup.sh")], env=env,
+                                capture_output=True, text=True, check=True)
+        self.assertNotIn(env["HOME_SERVER_TEST_SECRET"], result.stdout + result.stderr)
+        self.assertIn("Filesystem capacity:", result.stdout)
+
+    def test_package_plan_is_only_a_file_preview(self):
+        result = self.run_entry("setup.sh", "plan", "packages")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("listchanges.conf.d/home-server.conf", result.stdout)
+        self.assertIn("does not verify effective settings", result.stdout)
 
     def test_unimplemented_phases_fail_closed(self):
         for action in ("plan", "apply", "verify"):

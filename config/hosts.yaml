@@ -1,0 +1,14 @@
+# Draft inventory; not authorization to apply configuration.
+main:
+  observed_hostname: home-server
+  ssh_alias: home-server-alt
+  owner: shell
+  project_directory: /srv/Home-Server
+  management_interface: wlp1s0
+second:
+  observed_hostname: akihiko
+  ssh_alias: aki-server-vpn
+  owner: ansible
+  project_directory: /srv/Home-Server
+  management_interface: wlp4s0
+  tailscale_address: 100.64.0.3

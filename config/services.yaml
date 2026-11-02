@@ -1,0 +1,39 @@
+# Observed repository and live project names; no automatic enrollment is granted.
+# Resolve mounts, active inputs, readiness and recovery per service before promotion.
+main:
+  project: home-server
+  project_directory: /srv/Home-Server
+  compose_files: [compose.yaml, compose.production.yaml]
+  manager: compose
+  enrolled: false
+  services:
+    - cloudflared
+    - nginx
+    - postgresql
+    - postgresql_pgadmin
+    - postgresql_migration
+    - mariadb
+    - mariadb_migration
+    - pihole
+    - panel-cache
+    - pterodactyl
+    - pterodactyl-wings
+    - registry
+    - registry-ui
+    - prometheus
+    - node_exporter
+    - cadvisor
+    - loki
+    - promtail
+    - grafana
+second:
+  manager: ansible
+  enrolled: false
+  desired_observability: [prometheus, node_exporter, cadvisor, loki, alloy]
+  backup_storage: rest-server
+  project_identity: null
+  compose_files: [compose.observability.yaml, compose.backup-storage.yaml]
+external:
+  # Inventory is incomplete; unrelated workloads retain independent managers.
+  enrolled: false
+  observed_projects: [itskolar-system, pearl-horizon-airlines, skybridge-airways, nextcloud, aki, remote]
