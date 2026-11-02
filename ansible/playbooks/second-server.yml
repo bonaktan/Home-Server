@@ -2,13 +2,22 @@
 # Read-only enrollment preflight. Service roles remain gated and are not installed.
 - name: Inspect enrolled second server
   hosts: second_server
-  gather_facts: true
+  gather_facts: false
   become: false
   tasks:
-    - name: Reject unexpected inventory or host identity
+    - name: Reject unexpected inventory target before connecting
       ansible.builtin.assert:
         that:
           - inventory_hostname == 'aki-server-vpn'
+        fail_msg: Only the enrolled second-server alias may be targeted.
+    - name: Gather minimal host facts
+      ansible.builtin.setup:
+        gather_subset:
+          - '!all'
+          - min
+    - name: Reject unexpected host identity or OS
+      ansible.builtin.assert:
+        that:
           - ansible_facts.hostname == 'akihiko'
           - ansible_facts.os_family == 'Debian'
           - ansible_facts.distribution_major_version == '13'

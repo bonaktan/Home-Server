@@ -1,0 +1,16 @@
+// Only reviewed, metadata-only sources may write these files. Enroll other
+// sources after pre-storage privacy and position/duplicate checks.
+local.file_match "audit" {
+  path_targets = [{"__path__" = "/var/log/home-server/audit/*.log", "class" = "audit", "host" = sys.env("HOME_SERVER_HOST")}]
+}
+
+loki.source.file "audit" {
+  targets    = local.file_match.audit.targets
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

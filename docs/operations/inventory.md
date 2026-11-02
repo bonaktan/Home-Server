@@ -10,6 +10,8 @@ Running Compose projects observed: `home-server`, `itskolar-system`, `pearl-hori
 
 Named volumes observed include `home-server_database-data`, `home-server_mariadb-data`, `home-server_observ-grafana-data`, `home-server_panel-cache-data`, `home-server_postgresql-data`, `home-server_registry-data`, `home-server_static-website-data`, `itskolar-system_itskolardb`, `itskolar-system_itskolarresources`, `itskolar-system_itskolarsites`, `pearl-horizon-airlines_pearlfrontend`, `pearl-horizon-airlines_receipts`, `skybridge-airways_skybridge_nginx_logs`, and `skybridge-airways_skybridge_postgres_data`, plus anonymous volumes. No volume should be changed based on this list alone. Map all mounts, population, sizes and project labels before adoption; Docker's listing alone does not prove a volume is empty or disposable.
 
+The 2026-11-02 Docker network inspection found nginx and cloudflared sharing `home-server_shared_infra_net` with several application and infrastructure containers. The tunnel address observed then was `172.19.0.4`, which is dynamic and must not be treated as an enrolled trusted peer. The repository globally trusts `172.16.0.0/12` for forwarded client IPs; isolate ingress and verify exact peers before replacing that trust configuration.
+
 PostgreSQL and MariaDB are shared engines. The prior investigation identified ITskolar's authentication, CONNECT and schema gaps; MariaDB consumers and real application migrations still require inventory. Secret input interfaces must be recorded without values. Panel/egg versions, a relevant workload's supported delivery interface and its complete data/metadata dependencies remain unverified.
 
 ## Second server

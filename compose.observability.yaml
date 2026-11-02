@@ -1,0 +1,72 @@
+# Preparation only. Verify tailnet/firewall restrictions, source privacy,
+# image digests and capacity before deploying. No central services run here.
+services:
+  prometheus:
+    image: ${SECOND_PROMETHEUS_IMAGE:?Set a reviewed immutable image digest}
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --storage.tsdb.wal-compression
+    volumes:
+      - ./infra/prometheus/second-server.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${SECOND_TAILSCALE_IP:?Set the verified second-host Tailscale IP}:19090:9090"
+    extra_hosts:
+      - "host.docker.internal:${SECOND_OBSERVABILITY_GATEWAY:?Set the enrolled observability bridge gateway}"
+    networks: [observability]
+    restart: unless-stopped
+
+  node_exporter:
+    image: ${SECOND_NODE_EXPORTER_IMAGE:?Set a reviewed immutable image digest}
+    command: ["--path.rootfs=/host", "--web.listen-address=:19100"]
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped
+
+  cadvisor:
+    image: ${SECOND_CADVISOR_IMAGE:?Set a reviewed immutable image digest}
+    privileged: true
+    command: ["--housekeeping_interval=30s", "--docker_only=true", "--store_container_labels=false"]
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks: [observability]
+    restart: unless-stopped
+
+  loki:
+    image: ${SECOND_LOKI_IMAGE:?Set a reviewed immutable image digest}
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - ./infra/loki/second-server.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "${SECOND_TAILSCALE_IP:?Set the verified second-host Tailscale IP}:13100:3100"
+    networks: [observability]
+    restart: unless-stopped
+
+  alloy:
+    image: ${SECOND_ALLOY_IMAGE:?Set a reviewed immutable image digest}
+    command: ["run", "--storage.path=/var/lib/alloy", "/etc/alloy/config.alloy"]
+    environment:
+      HOME_SERVER_HOST: akihiko
+    volumes:
+      - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/log/home-server:/var/log/home-server:ro
+      - alloy-data:/var/lib/alloy
+    networks: [observability]
+    restart: unless-stopped
+
+networks:
+  observability:
+    internal: true
+volumes:
+  prometheus-data:
+  loki-data:
+  alloy-data:
