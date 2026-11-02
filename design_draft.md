@@ -1,7 +1,7 @@
 # Home server infrastructure refactor
 
 * **Author:** Server owner, with Codex
-* **Status:** Draft — owner-directed review resolutions applied; revised Alternatives Considered ready for approval
+* **Status:** Approved design — finalized; execution remains subject to inventory, readiness and validation gates
 * **Date:** 2026-11-02
 * **Requirements input:** [Approved concepts brief](concepts_brief.md), including the post-review decisions and private-repository clarification.
 
@@ -490,6 +490,170 @@ Creating another certificate client/timer without inspecting the existing instal
 
 Universal shell transcription or retaining raw arguments and redacting only during forwarding would make command capture easier to describe. It would violate the agreed privacy boundary and still not prove every command's real outcome. Bounded native metadata plus controlled operation records retain useful attribution with explicit gaps for builtins, external actions and lost events. The cost is fixture work to prove safe capture before any new retention, plus volume/continuity monitoring for 30 searchable days. Failure of that proof is a gate, not permission to collect raw secrets or silently omit the requested coverage.
 
+## Detailed Implementation Plan
+
+This is an execution specification for a later implementation phase. Approval authorizes the written design, not production changes. The owner approved the revised plan on branch `rework`. All changes below preserve D-01–D-33, including continued service operation during degraded backups and advisory size alerts without enforced intake caps.
+
+The list is ordered and unified: each stage includes its repository files, installed destinations, checks, stop conditions and recovery. New names below are proposed files to create; their absence today is expected. Versions, actual addresses and byte budgets must be established by the specified evidence gates rather than invented. A failed gate stops that stage while other independent preparation may continue.
+
+### 1. Establish inventory, scope and protected rollback material
+
+Create `docs/operations/inventory.md` to record both hosts' effective OS/package versions, interfaces/addressing, firewall backends/rules, schedules, running Compose project labels, exact volume names, data sizes, mounts, secrets input interfaces and management recovery access. Record privileged evidence gaps explicitly. Include installed panel/egg versions and one actual relevant workload. Use redacted structured observations; do not archive raw environments or secret-bearing command lines.
+
+Create `docs/operations/capacity.md` for measured steady/peak RAM, disk/inode use, telemetry/audit growth, database/Pterodactyl backup size/churn, image retention, temporary capture space and update/restore headroom. Establish per-destination advisory byte budgets and operational reserves. Warn at 80%, exceed at 100%, clear below 75%; preserve explicit stale/unknown observations. These are advisory values, not upload or spending limits.
+
+Create `docs/operations/change-register.md` for Debian deviations: baseline evidence, current/effective/target state, rationale, confidence, owning module, restart/reboot need, validation and rollback. Preserve the existing immutable investigation reports. Unknown install history stays unknown.
+
+Create `docs/operations/enrollment.md` with exact organization/repository/workflow IDs, owner numeric ID, package access, production refs, GitHub plan/allowance, current runner units, application Compose/workflow paths, certificate installation and router/DHCP controls. This is the required scope attachment for external files: copy exact legacy filenames here before authorizing their modification or retirement. The reviewed evidence did not establish every remote workflow filename; do not claim an exhaustive executable external-file list until this attachment is complete.
+
+**Gate:** identify a working independent management/recovery route, exact populated volumes and a usable protected copy before replacing anything. Inventory actual backup data and verify available included build allowance. If access/space is inadequate, retain running state and report the specific blocker. No cleanup, volume deletion, blanket permission changes or guessed interface replacement is an inventory action.
+
+### 2. Define configuration and operation records
+
+Create the following admin-reviewed files; promote them into `/etc/home-server/` only through the host's selected configuration owner:
+
+| Create | Responsibility and reason |
+| --- | --- |
+| `config/hosts.yaml` | Host identities, configuration owner, observed interfaces/addresses and installed project paths. Keep the Atom outside Ansible application targets. |
+| `config/services.yaml` | Explicit service enrollment, manager, production files/project identity, networks, data mounts, readiness and recovery references. Unknown services receive no automatic authority. |
+| `config/image-policy.yaml` | Deployed digest/platform, discovery channel, compatible release boundary and automatic/alert-only class, including separate major-release discovery. |
+| `config/consumers.yaml` | Supported environment/file/panel input mappings and active-version references; values are absent. Include migration/provisioning owners. |
+| `config/backup-policy.yaml` | Dataset/capture ownership, destination identities, six-hour schedule, normal 24-hour target, accepted degradation policy and advisory byte thresholds. |
+| `config/ci-policy.yaml` | Enrolled repositories/workflows/refs, approved owner identity, service scope, registry namespaces and current deployment epoch. |
+| `docs/operations/record-contracts.md` | Bounded request/event/catalog fields, allowed states, retention and crash reconciliation; keeps CI, maintenance, capture and activation consistent. |
+
+Records must bind operation ID, host/service, request origin, expected prior state, image digest/platform, canonical configuration identity, active secret references and observation/result times. Secret publication additionally binds predecessor, encrypted candidate digest, both protected locations and receipt dependencies. Never let an untrusted record select shell, mounts, arbitrary paths or privileged configuration.
+
+Specify durable transitions: received → verified → prepared → applying → observed completion, with rejected/deferred/failed/uncertain states. Adopt incoming files without following links; validate type/length/scope before privileged use. Crash recovery inspects actual state before another mutation. Exact serialization must support durable replacement and power-loss tests; a rename or released lock alone is not a completed operation.
+
+### 3. Implement the main-host shell configuration path
+
+| Create or modify | Change and reason |
+| --- | --- |
+| `setup.sh` — modify | Make it the maintained entry point for inspect, plan, apply-one-phase and verify. Default inspection must not mutate the host. |
+| `new_setup.sh` — modify | Delegate to the same implementation with a deprecation notice; retire its competing state-writing logic. |
+| `scripts/host/main.sh` — create | Validate host identity, selected phase and maintenance state; orchestrate bounded phase operations. |
+| `scripts/host/common.sh` — create | Shared safe metadata events, root-owned file staging, prior-file preservation and verified apply/recovery handling. Do not log arbitrary argv or use shell tracing. |
+| `scripts/host/inventory.sh` — create | Produce the reviewed redacted baseline and drift observations. |
+| `scripts/host/packages.sh` — create | Adopt required signed repositories/packages and reporting before upgrades; avoid unconditional full upgrades. |
+| `scripts/host/hardware.sh` — create | Manage only justified boot/module settings with effective checks and previous-boot recovery; preserve current tweaks during adoption. |
+| `scripts/host/network.sh` — create | Apply explicit interface/resolver targets and validate independent management access. |
+| `scripts/host/access.sh` — create | Validate effective SSH settings and manage narrow submission identities separately from admin access. |
+| `scripts/host/firewall.sh` — create | Reconcile dedicated rules in the verified existing backend while preserving Docker/Tailscale chains. Never flush the host as setup. |
+| `scripts/host/audit.sh` — create | Install only the privacy-tested capture/collection configuration. |
+| `scripts/host/schedules.sh` — create | Install owned units/timers and retire documented competing schedules after validation. |
+
+Installed configuration scope includes `/etc/apt/sources.list.d/`, `/etc/apt/keyrings/`, `/etc/apt/apt.conf.d/`, `/etc/apt/listchanges.conf.d/`, `/etc/update-motd.d/95-apt-changes`, inspected SSH/network/resolver drop-ins, dedicated firewall rules and owned systemd units. Populate exact adopted source filenames and existing scheduler entries in the inventory before touching them. Inspect `/etc/default/grub`, `/etc/modprobe.d/iwlwifi.conf` and microcode/initramfs evidence; changing their values requires recorded rationale and rollback, not generic normalization.
+
+**Gate:** first apply must preserve unrelated state; repeated apply produces no duplicate rules or unintended change. Test syntax and an independent new SSH connection before committing access/network changes. Preserve prior files and arm a bounded rollback before risky remote changes. Keep old deployment writers suspended during canonical-input adoption. On failure restore the recorded phase state, not an entire unrelated host configuration.
+
+### 4. Correct package reporting and bound administrative capture
+
+Create `infra/host/apt/listchanges.conf` for the native log frontend and both NEWS/changelog selection, and `scripts/host/listchanges-output.sh` as its reviewed output filter: retain changelog text on stdout for logging, mirror only that content to a controlling terminal when available. Create `infra/host/logrotate/home-server` to rotate owned changelog/operation/audit files. Remove the adopted `/etc/apt/apt.conf.d/05listchanges-redirect`; preserve package-owned `/etc/apt/apt.conf.d/20listchanges` protocol integration. Modify the MOTD script to read without truncating history. Preserve the already-correct PAM dynamic-MOTD entry.
+
+Create `infra/host/audit/home-server.rules`, `infra/host/audit/auditd.conf` and `infra/host/journald/home-server.conf` for bounded native capture, queue/loss reporting and appropriate persistence. Create `scripts/operations/event.sh` to emit reviewed metadata for controlled operations, without raw request bodies, environments or unrestricted arguments.
+
+**Gate:** in a disposable Debian 13 fixture, test interactive/noninteractive APT behavior and inspect every newly retained representation for harmless secret markers: native files, journal, queues, rotations, archives and Loki. Test failed operations and full/unavailable log sinks. Verify actor/context and distinguish execution from actual completion. If native capture cannot meet the privacy boundary, retain metadata-only coverage and document the gap; do not enable a raw recorder and promise later redaction. No general shell classifier or terminal transcript is implemented.
+
+### 5. Deploy the second server's authorized roles through Ansible
+
+| Create | Change and reason |
+| --- | --- |
+| `ansible/requirements.yml` | Pin required collections; avoid an unbounded workstation dependency environment. |
+| `ansible/inventory/hosts.yml` | Enroll only the second host for application targets, using the user's explicit SSH configuration. |
+| `ansible/group_vars/second_server.yml` | Nonsecret observability/backup paths, allowed main-host identity and measured resource/advisory budgets. |
+| `ansible/playbooks/second-server.yml` | Invoke only authorized roles with staged validation and lifecycle coordination. |
+| `ansible/roles/observability/tasks/main.yml` | Install its Compose/configuration/persistent storage and source restrictions. |
+| `ansible/roles/backup_storage/tasks/main.yml` | Install rest-server persistence, authenticated TLS, append-only routine access and independent retention administration. |
+| `ansible/roles/maintenance/tasks/main.yml` | Install local enrolled maintenance, safe events and timers; prevent independent Compose mutations. |
+| `compose.observability.yaml` | Define second-host Prometheus, node-exporter, cAdvisor, Loki and Alloy; no Grafana or central-service replicas. |
+| `compose.backup-storage.yaml` | Define the distinct backup-storage service and persistent repository path; updates remain alert/manual. |
+| `infra/backup/rest-server.conf` | Versioned nonsecret rest-server operating parameters; credentials/trust material are delivered separately. |
+
+Roles consume common reviewed configuration rather than duplicate it in additional generated templates. Place installed files under the enrolled project directory and promote operation policy to `/etc/home-server`. Use supported secret delivery for TLS/authentication; do not commit credentials or expose them through Ansible diff/debug output.
+
+**Gate:** verify actual second-host OS/package compatibility, unrelated workload preservation, persistent backend data and independent local collection during link loss. Test append-only overwrite/delete denial and independent retention access on disposable repositories. Size monitoring is advisory only, as selected; do not silently add enforced admission limits. Verify permitted main-host Loki backend authority and rejected unrelated/CI principals. No general second-host Docker TCP or CI endpoint is installed.
+
+### 6. Establish consistent captures and protected recovery repositories
+
+Create `scripts/operations/capture.sh` for enrolled native database captures and Pterodactyl capture/quiescence procedures. It takes the lifecycle lock, fixes matching roles/configuration/image/secret references, completes the local consistent capture/manifest, then releases the lock before transfer. Create `scripts/operations/backup.sh` for Restic transfers, destination-specific recoverable-point verification, retries and freshness state. Create `scripts/operations/backup-status.sh` for advisory bytes/free space/provider usage and warning/exceeded/clear/stale observations. Create `scripts/operations/retention.sh` for the independent-admin maintenance procedure; it must not make deletion authority available to the routine Atom identity.
+
+Create `infra/systemd/home-server-backup.service`, `home-server-backup.timer`, `home-server-backup-status.service` and `home-server-backup-status.timer`. Stagger six-hour captures and status observations with other maintenance. Create `docs/operations/recovery.md` with set manifests, independent key/access custody, restore order, compatible artifacts, outage exceptions and isolated restore evidence.
+
+Use separate R2 and second-host repositories, independent passwords/recovery access, and a separate append-only repository for independently encrypted secret bundles/receipts. Verify actual R2 prefix locks: protect data/index/snapshots/keys/configuration while preserving mutable lock-file operation. Routine credentials cannot remove retained objects or retention policy. Independent maintenance disables routine write authority, verifies denial, preserves a known usable set, performs reviewed forget/prune/check, restores protection and only then resumes routine access.
+
+**Gate:** test repository compatibility and actual application restoration, not only uploads/checks. Verify matching account/credential/schema state and Pterodactyl files/metadata. Exercise capture concurrent with activation/deployment, destination failure, ambiguous transfer, corruption, extended downtime and interrupted retention. Both-destination failure with continuing writes must produce degraded alerts without a policy-driven service shutdown. Advisory size exceedance alerts without automatic cutoff/pruning/revocation. Restore working protection before clearing its degraded state; preserve last usable sets throughout.
+
+### 7. Adopt central Compose and durable telemetry
+
+Modify `compose.yaml` and `compose.production.yaml` to add Vault and persistent Prometheus/Loki/Alloy storage, replace Promtail, use protected active inputs and explicit image references, and preserve adopted data/project identities. Modify `compose.staging.yaml` so staging cannot be selected implicitly for production and its bindings remain isolated. Never rename a populated volume by accident or use deletion to rerun image initialization.
+
+Modify `infra/prometheus/prometheus.yml`, `infra/loki/loki-config.yml` and `infra/grafana/provisioning/datasources/datasources.yml` for host-local ownership, persistent paths, verified second-host endpoints and required retention. Create `infra/alloy/config.alloy` for shared collection logic and safe per-host inputs; persist positions. Retire `infra/promtail/promtail-config.yml` only after conversion/position/query validation. Create `infra/grafana/provisioning/alerting/operations.yaml` for reviewed backup, size, update-pending and collection-health rules. Preserve existing authenticated Grafana DB/export, encryption configuration, contact points and routing instead of overwriting them with a blank provisioned replacement.
+
+**Gate:** adopt any existing telemetry data before recreation; test restart persistence, 30 searchable audit days, routine retention, query/compaction load, collection gaps and duplicate suppression. Validate existing alerts and new warning/exceeded/resolved/stale transitions through the owner's actual destinations. Numeric resource limits must fit measured combined peaks; runtime memory targets must agree with enforced caps. Do not claim configured retention duration guarantees history under ingestion/disk failure.
+
+### 8. Bootstrap Vault and prove protected publication/delivery
+
+Create `infra/vault/vault.hcl` for local integrated storage, native AWS KMS seal, internal TLS and verified memory/audit settings. Create `infra/vault/policies/publisher.hcl` and `infra/vault/policies/delivery.hcl` for bounded staged publication and per-consumer delivery. Create `scripts/operations/publish-secret.sh`, `activate-secret.sh` and `rebuild-vault.sh` for the already specified candidate/receipt protocol, manual activation and independent-export rebuild. These are narrow operations using supported CLI/API tools, not an application SDK or custom unseal helper.
+
+The publisher assigns a stable operation/predecessor, encrypts the complete managed candidate with age, verifies it at both destinations, validates the staged serving copy, verifies matching complete receipts at both destinations and only then acknowledges a pending version. The activation operation protects intent, coordinates backend changes and selected active inputs, invokes the supported lifecycle, validates the actual consumer and records completion before safe revocation. It never treats the latest KV version as automatically active.
+
+Install privileged bootstrap/runtime inputs outside committed files with restricted permissions. Keep recovery access independent of the old Vault/KMS/Atom; protect managed policy/auth/bootstrap changes too. Routine UI writes cannot bypass publication. Deliver existing environment/file interfaces; Compose environment changes require recreation. Use supported panel/Wings configuration for one real relevant workload, preserving unrelated fields and startup behavior. New consumer enrollment waits if that compatibility is absent.
+
+**Gate:** interrupt every publication/activation boundary, including successful uploads with lost responses, and verify retry/reconciliation without false acknowledgment or early activation. Test concurrent pending secrets versus automatic image update. Rebuild an isolated fresh Vault with the original KMS unavailable, using only retained exports and independent kit. Test source-output/native-audit privacy and verified container no-swap/core-dump behavior. Defer secret changes when a required destination is full/unavailable; data-backup exceptions do not override this.
+
+### 9. Adopt database/account state and application migrations
+
+Create `scripts/operations/provision-database.sh` for bounded PostgreSQL/MariaDB adoption and reconciliation through supported clients. Inputs identify enrolled database/accounts, permitted network, protected credential references and migration ownership. Keep values out of argv/logs; validate identifiers and safe serialization. Reconcile persisted roles/passwords/grants deliberately; initialization environment variables do not rotate existing accounts.
+
+Preserve `infra/migration/postgresql/V1__ITskolarSystem-Skybridge.sql` and `infra/migration/mariadb/V1__Pterodactyl.sql` as applied-history evidence: do not rewrite or replay them blindly. After history inventory, retire their automatic central jobs from Compose in favor of explicit provisioning and each application's supported schema migration. Any required forward corrective migration must receive an exact new filename and checksum entry in the inventory before execution; its content depends on verified applied state.
+
+Modify `/srv/ITskolar-System/compose.production.yaml` for explicit enrolled database-network/input delivery; use its actual base file recorded in inventory. Adopt existing backend passwords, CONNECT/schema permissions and migration history, and enable its database feature only through its existing supported configuration when verified. For `/srv/Skybridge-Airways`, record exact existing Compose/Flyway filenames and data ownership before a separate shared-engine integration; preserve its current local engine/data until verified transfer. Inventory panel and game/application database identities separately. No application or startup source is changed for secret delivery.
+
+**Gate:** verify name resolution, TCP, authentication, database/schema permissions and an allowed operation from each real consumer, plus rejected cross-application access. Repeating provisioning must preserve data and avoid unrequested password reset. Restore with matching credentials before switching an endpoint. Failed adoption retains existing volumes and recovery material; it does not trigger destructive initialization.
+
+### 10. Implement restricted CI submission and the shared lifecycle
+
+Create `scripts/operations/submit.sh`, `verify-deployment.sh`, `lifecycle.sh`, `scan-images.sh` and `reconcile.sh`. Respect bounded scope/size, root-owned installed configuration, immutable digest/platform, expected prior state, explicit active inputs, persistent operation identity, per-host epoch and shared capture/lifecycle coordination. `submit.sh` is unprivileged; privileged execution must not follow caller-controlled links or accept arbitrary shell/Compose/mounts. `scan-images.sh` uses regctl and the catalog; unknown compatibility defers. `reconcile.sh` inspects interrupted state rather than replaying a mutation blindly.
+
+Create `infra/systemd/home-server-deploy.service`, `home-server-deploy.path`, `home-server-maintenance.service` and `home-server-maintenance.timer`; create `infra/host/ssh/submission.conf` for the forced-command identity and forwarding/PTY/rc restrictions. Install only the Atom's CI endpoint; the second host gets local observability maintenance enrollment. Keep the submitter outside Docker/arbitrary sudo and restrict CI tailnet grants to its designated Atom port.
+
+In each enrolled application repository create `.github/workflows/build-deploy.yml` for standard hosted Linux builds, private GHCR publishing and separate restricted submission, and `compose.deployment.yaml` for the reviewed deployment contract. Promote reviewed production configuration into `/etc/home-server/projects/<enrolled-service>/`; do not execute a collaborator-editable Compose file as root. Inventory any necessary Dockerfile/build-context changes first; they require separate scoped implementation review and are not implied application/startup changes for secrets.
+
+In the owner-only approval repository create `.github/workflows/approve-deployment.yml` and `README.md`. No application checkout/dependencies run in approval. Bind verified owner action, source/build origin attempt, digest, target and current epoch. Keep the narrow GitHub App key at home, separate from supported GHCR pull credentials. Verify actual plan/package access before relying on this workflow. Retire the exact legacy workflow filenames and runner unit/registration entries recorded in enrollment only after validated cutover; suspension during migration prevents races before then.
+
+**Gate:** test stolen submission credentials, forged owner fields, hostile paths/input, artifact substitution, owner/collaborator reruns, partial-build reuse, concurrent requests, restart/replay and old-host restore. Renew the epoch after reconciliation and reject old unconsumed requests/approvals. Distinguish submission acceptance from deployment readiness. Unavailable authorization/registry input defers the operation. Validate compatible stateful restoration before automatic maintenance, and keep external/Pterodactyl application images alert-only.
+
+### 11. Repair ingress, certificates and Pi-hole; cut over DHCP separately
+
+Modify `infra/nginx/nginx.conf`, `infra/nginx/conf.d/pihole.conf` and `infra/nginx/conf.d/pgadmin.conf` to remove broad inherited proxy-address trust and preserve original-peer internal authorization. Create `infra/nginx/snippets/trusted-ingress.conf` and include it only in the applicable public hosts: `infra/nginx/conf.d/grafana.conf`, `pterodactyl.conf`, `prometheus.conf`, `registry.conf`, and the three existing files under `infra/nginx/conf.d/external/` (`bonnybonnybonaktan.xyz.conf`, `pearl-horizon.conf`, `staffpanelicious.conf`) after endpoint/access inventory verifies each remains required. Use the enrolled ingress-only network/exact tunnel peers. Inventory the Prometheus route's actual intended access rather than assuming a public name authorizes unauthenticated access.
+
+Modify production certificate mounts coherently in Compose and, where required by the installed version, `infra/pterodactyl/etc/config.yml`. Create `scripts/operations/certificate-deploy.sh` and `infra/systemd/home-server-certificates.service`/`home-server-certificates.timer` to adopt one inspected Certbot installation, protected DNS-01 credentials and tested consumer reload. Retire exact duplicate renewal schedules only after inventory and replacement proof; do not assume root cron is absent. Preserve `infra/certs/san.cnf` unless issuance inventory demonstrates a required change. No unrelated panel nginx or scanner-filter configuration is rewritten by default.
+
+Create `config/pihole-policy.yaml` for intended DNS/NTP/DHCP and internal names, applied through supported existing inputs to the adopted `infra/pihole/` state. Do not introduce a competing raw-state writer. Repair nginx's actual reachable host upstream with narrow firewall rules. Verify direct LAN name resolution and browser access separately from TCP/UDP DNS and NTP. Establish one host clock owner before removing unnecessary Pi-hole time privileges.
+
+**Gate:** validate nginx configuration/certificate actually served; reject forged LAN headers from untrusted/tunnel peers while preserving real LAN access, including IPv6. Test renewal plus deploy hooks in staging and consumer reload through lifecycle coordination. DHCP requires recorded stable addressing, router configuration/leases, isolated test scope and independent recovery access. Disable router DHCP before enabling the verified production Pi-hole scope; on failure disable Pi-hole DHCP before restoring router authority. Test a real lease/renewal and internal/Internet resolution. No second-host DNS/DHCP replica is added.
+
+### 12. Preserve operator documentation and prove acceptance in isolation
+
+Modify `README.md` and `System_Documentation.md` to describe the selected two-host ownership, explicit production invocation, enrollment, active/pending secrets, backup degradation/size alerts, accepted Loki authority, safe maintenance and recovery. Create `docs/operations/runbooks.md` for routine provisioning, activation, authorized deployment, stateful updates, certificate/DHCP handling and failure triage. Link exact installed identities and adopted paths from inventory; omit secret values.
+
+Create `tests/operations/README.md` for disposable fixture setup and recorded evidence, and `tests/operations/test_contracts.py` for meaningful state/security contract cases: publication acknowledgment under failures, input validation and authorization binding, operation replay/epoch invalidation, active/pending isolation, capture coordination, copy protection, alert state and source privacy. Tests must exercise observable contracts with fault injection, not mirror shell lines. Use disposable services/accounts/repositories and harmless markers; never destroy a production key, stop production Loki or trigger real notifications as a test without separately authorized execution scope.
+
+Acceptance requires the six documented failure cases with their explicit exceptions, actual consumer restoration, indefinite preservation of the last usable compatible set, capture/activation/update concurrency, admitted versus denied principals, alert warning/exceeded/clear/stale transitions and combined maintenance peaks. Record exact tested versions, sizes, elapsed times, results and limitations in the operations evidence. Budget/permission/consumer compatibility failures stop the affected stage; they do not authorize moving central services, changing application startup code, reducing audit history or silently weakening secret durability.
+
+**File-scope completion gate:** before executing this plan, the enrollment attachment must enumerate every existing external workflow, adopted root schedule/source file, application migration and provider-managed policy to change or retire. The current evidence cannot honestly supply those exact names. Add that evidence-driven attachment and obtain readiness review; do not treat unspecified external paths as permission for arbitrary edits. The new repository filenames above are fixed proposals, while discovered legacy paths must be explicit before their stage starts.
+
+Predecessor reconciliation and finalization are recorded below. Before production execution, complete the required evidence attachments and obtain fresh implementation-readiness/security review of exact interfaces, permissions and execution sequence. Production implementation remains a separate authorization.
+
+## Finalization and predecessor reconciliation
+
+The owner approved Detailed Implementation and document finalization after confirming that the primary deployment path is an in-place refactor. A fresh Debian reinstall is not the primary migration sequence; isolated rebuild/restore remains part of recovery validation. No reformat or live implementation is authorized by this document.
+
+Reconciliation against the concepts brief, including its appended D-01–D-33 decisions, found no unresolved architecture contradiction or unapproved architecture/interface/dependency addition. The shell/Ansible ownership split, shared engines, Vault/KMS with independent rebuild exports, restricted CI, compatible maintenance, telemetry placement, capture coordination and accepted backup/Loki risks are retained. Proposed file names and operation records make those choices concrete rather than add a new runtime platform.
+
+The exact legacy external paths, privileged host evidence, supported versions, numerical capacity/advisory budgets, real consumer delivery, safe audit capture and isolated recovery evidence remain execution/readiness gates. Finalization does not claim those gates passed or that the detailed plan received an independent implementation-readiness review. Complete the scope attachment and review before production execution.
+
 ## Supporting Evidence and Decision Record
 
 * [Concepts brief and owner decisions](concepts_brief.md): requirements R-01–R-06, decisions D-01–D-33, evidence boundaries, and post-review dispositions.
@@ -499,4 +663,4 @@ Universal shell transcription or retaining raw arguments and redacting only duri
 * [Security implications and review scope](docs/designs/security-considerations.md): historical/current review coverage, owner-accepted boundaries, implementation tests and the distinction between document resolution and proven controls.
 * [Current-design reviews](consolidated_review_report.md) and [owner-directed resolution](docs/reviews/2026-11-02-design-resolution/goldfish_review_report.md): independent findings, later security verification, document fixes, accepted risks and outstanding implementation tests. The reviewed snapshots remain unchanged; the working draft now includes authorized resolutions.
 
-*Drafted with EGM. The owner approved Overview & Goals and Technical Plan, then supplied review resolutions D-29–D-33 and delegated Nit corrections. Revised Alternatives Considered is ready for section review; Detailed Implementation follows its approval. The post-resolution text has not had another independent review.*
+*Drafted with EGM. The owner approved all sections and finalization on branch rework, retaining the in-place refactor assumption. Finalization is documentation approval, not authorization to execute. Earlier reviews cover their frozen architecture versions; fresh implementation-readiness/security review of the detailed plan and the stated evidence gates remain required.*

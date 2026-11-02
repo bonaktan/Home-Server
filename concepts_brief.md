@@ -622,3 +622,15 @@ For D-32, the follow-up explicitly offered independent upload limits versus aler
 The delegated Nits are textual fixes: define the per-host authorization generation and restore invalidation semantics, update drafting-stage wording, identify lifecycle orchestration as custom rather than a native product feature, distinguish Vault's S3 backend from unverified R2 compatibility, and simplify the license-comparison paragraph. They add no product and authorize no application/startup-code change.
 
 **Current drafting stage:** R-01–R-05 are settled at the document level through approved corrections or explicit risk acceptance, and the five Nits are corrected. Implementation checks and isolated restores remain required; no post-edit independent re-review or implementation-readiness test has been run. Revised Alternatives Considered awaits its section approval before Detailed Implementation.
+
+### Revised plan approved; Detailed Implementation drafted
+
+The owner created/switched to branch `rework` and approved the revised plan, allowing the EGM draft to advance beyond Alternatives Considered. Detailed Implementation is now written in [design_draft.md](design_draft.md#detailed-implementation-plan) for section review. It specifies proposed repository files, installed scope, migration sequence, validation, stop conditions and recovery. Approval remains documentation approval; production implementation is separate.
+
+Exact legacy external workflow, scheduler/source and corrective-migration paths still require the explicit enrollment/inventory attachment before their execution stages. These are stated readiness gates, not invented filenames or authority for arbitrary edits. The new draft has not received implementation-readiness review. Frozen reviewed artifacts and the original 417-line brief remain historical evidence.
+
+### Final document approved and saved
+
+The owner approved Detailed Implementation and finalization on branch `rework`, after confirming that the plan assumes an in-place refactor. The canonical approved design is [docs/designs/home-server-refactor.md](docs/designs/home-server-refactor.md). A fresh reinstall is not its primary migration sequence; no reformat, code implementation or live deployment was authorized.
+
+Final reconciliation found no unresolved architecture contradiction or unapproved architecture/interface/dependency addition against the latest decisions. Inventory attachments, measurements, consumer/privacy/recovery proof and fresh implementation-readiness/security review remain required before execution. Earlier draft/review stages above are historical; this entry records the current handoff.
