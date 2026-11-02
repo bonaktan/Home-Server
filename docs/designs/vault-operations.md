@@ -1,0 +1,75 @@
+# Vault operating profile and known issues
+
+* **Date:** 2026-11-02
+* **State:** D-24 selects local Vault storage, AWS KMS auto-unseal, and independent encrypted rebuild exports. Feasibility tests remain pending.
+* **Context:** [Secrets comparison and publication contract](secrets-publication.md), [approved requirements](../../concepts_brief.md), and [design draft](../../design_draft.md).
+
+## What is established
+
+Use Vault as the preferred direction and disclose problems promptly. No current evidence rules it out, but it has not been shown to fit the complete Atom workload or meet the protected publication requirement. The proposal uses static KV inputs and host/admin delivery into existing application configuration; it does not require application SDKs, changed startup scripts, dynamic credential leases, or automatic consumer restarts.
+
+Both operating profiles below use one Vault instance with local integrated storage on the Atom, as proposed in option C. They add no database engine process and no second-host Vault replica. Shared PostgreSQL/MariaDB remain the application database choice in D-22. The S3/R2-primary and PostgreSQL Vault backends remain documented alternatives, rather than silent replacements for these profiles.
+
+## Issues to account for now
+
+| Issue | Established behavior or evidence | Consequence for this design |
+| --- | --- | --- |
+| V-01 — local completion versus protected publication | A local KV write and a later periodic copy leave an off-site loss window. The selected product does not by itself establish the proposed R2-before-acknowledgment contract. | A protected publication path must cover every acknowledged managed change and its recovery-critical metadata. Ordinary unrestricted UI/CLI saves cannot be the normal completion path in this proposal. Keep normal UI access read-only where necessary; the write-capable publisher is an administrative operation, not an application identity. Prove interruption, retry, concurrency, and full recovery before accepting this mechanism. |
+| V-02 — restart and unseal | The selected AWS KMS seal needs working KMS/key access to unseal. Recovery shares do not replace that dependency. | Automatic image recreation must distinguish a KMS-dependent sealed state from a failed upgrade and avoid rollback/restart loops. New fetches/changes can wait; valid already-delivered inputs should not be invalidated. Use the selected export-based rebuild fallback below when the old key cannot be recovered. |
+| V-03 — limited RAM, swap, and integrated storage | The Atom has 4 GiB nominal RAM. Its 2026-11-01 snapshot showed about 1,619 MiB available and 561 MiB of a 3 GiB swap partition used. Encryption/enforcement of that swap was not established. Vault documents a memory-locking trade-off with integrated storage. | Measure the combined workload. Plan explicit Vault memory/no-swap enforcement and verify the host supports it; do not disable host swap globally as an untested shortcut. Include snapshot/publication/restore and audit peaks, not only idle RSS. Capacity failure is a reason to return to the owner. |
+| V-04 — audit failure can block requests | If all enabled Vault audit devices are unavailable, Vault becomes unavailable. Local log capacity and permissions can therefore affect secret operations. | Provide bounded local audit storage, rotation, free-space/collector checks, and a recovery procedure. Sending selected records to Loki must not make every request depend on Loki being online. A second device on the same full filesystem does not remove that failure. Do not silently turn auditing off to pass a health check. |
+| V-05 — native audit is not automatically safe everywhere | Vault hashes most string values by default, but not all data types or default logged header values. This does not establish the agreed privacy boundary for every field. | Keep managed secret values as strings where supported, review metadata/header/path handling, retain hashing, and prohibit new raw secret-bearing CLI arguments or request-body logs. Test sensitive markers across Vault/native-host records, collector spools, rotation, archives, and Loki before enabling the path. Document observable gaps for exempt administrative endpoints. |
+| V-06 — consumer delivery remains unverified | Existing environment/file inputs are the permitted integration boundary. A specific relevant Pterodactyl workload and deployed version have not been validated. | Preserve application/egg startup behavior and use supported configuration operations. Test an actual workload and its operator permissions; report incompatibility instead of inserting a wrapper or SDK. An ordinary Compose restart does not load a changed environment. |
+| V-07 — stateful upgrades and recovery | A single local integrated store shares the Atom/eMMC failure domain. A new Vault version can change persistent state; an old image alone is not a complete recovery plan. | Require a compatible, tested recovery set, independent seal/access material, and release-specific upgrade rules. Automate only classified compatible maintenance; defer uncertain candidates and report them. Track image/configuration identity and distinguish process startup, unsealed readiness, and consumer validation. |
+| V-08 — shared host privileges | Vault shares the Atom with infrastructure and applications. Host root and Docker-level control remain broader than Vault's per-workload policies. | Keep build jobs off production as already decided, restrict delivery identities, and keep recovery-copy administration separate from the Atom. This placement does not provide an independent security boundary against a fully privileged host compromise. Preserve recoverability without claiming that delivered or in-memory values remain hidden from root. |
+
+The restart behavior and KMS limitation are documented in [Vault seal/unseal](https://developer.hashicorp.com/vault/docs/concepts/seal). Audit availability, hashing, headers, and endpoint exceptions are documented in [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit). Host resource figures come from the immutable [Debian baseline](../investigations/2026-11-01-debian-host-baseline.md), not a new load test. The no-code delivery and protected-write requirements come from the approved brief; the publication mechanism remains a design obligation.
+
+## Memory and swap treatment to validate
+
+HashiCorp recommends disabling `mlock` for integrated storage because memory-mapped storage can otherwise increase resident memory and cause OOM problems. This requires preventing sensitive process memory from reaching unprotected swap. See [Vault configuration](https://developer.hashicorp.com/vault/docs/configuration) and [production hardening](https://developer.hashicorp.com/vault/docs/concepts/production-hardening).
+
+For the proposed container deployment, test an explicit memory limit with the memory-plus-swap limit set to the same positive value, preventing that container from using swap while leaving the host policy available to other workloads. Verify actual cgroup enforcement, OOM reporting, process/plugin placement, and core-dump suppression. A low cap can still kill Vault; it is not evidence of fit. Set the numerical budget after measuring the combined workload. Docker documents both the [limit semantics](https://docs.docker.com/engine/containers/resource_constraints/) and [Compose setting](https://docs.docker.com/reference/compose-file/services/#memswap_limit).
+
+The target host's effective swap-limit support and mounted data filesystem remain preflight items. If this boundary cannot be verified, return to the owner with the resource/security trade-off before changing the host-wide swap configuration. No swap, Docker, or kernel setting has been changed in this planning work.
+
+## Operating profiles considered
+
+The owner selected profile B's local storage and native AWS KMS unseal, with the independent export-based rebuild fallback described in the next section. Profile A remains the unselected alternative.
+
+| | A — Local integrated storage, manual unseal | B — Local integrated storage, AWS KMS auto-unseal |
+| --- | --- | --- |
+| Mechanism | An authorized admin supplies the required protected Shamir shares after each Vault restart. | Vault uses a scoped AWS identity and a customer-managed KMS key to unseal after startup. |
+| Benefit | No cloud-unseal dependency or KMS bill. An admin with the required offline material can unlock surviving local storage without Internet access. | Compatible unattended restarts can return Vault to readiness without waiting for an admin, while the KMS dependency is healthy. |
+| Cost | A compatible automatic image update can leave new secret fetches/changes waiting for manual unseal. Protect and test independently accessible unseal material. Share count, threshold, and custody must be specified before initialization. | Adds an AWS account/key, IAM administration, network dependency, bootstrap credentials outside Vault, and ongoing KMS charges. Key administration and deletion authority must be separate from the Atom's routine use identity. |
+| Failure boundary | Missing the required unseal material prevents access to that store. Recovery must not depend on the sealed Vault holding the only usable copy. | KMS/key/access failure can prevent unseal. Recovery keys do not replace an unavailable or destroyed KMS key for decrypting existing Vault storage. An independent export can recover managed values only if its complete scope and decryption route have been proven. |
+| Interaction with accepted downtime | Fits manual restoration with no fixed deadline, at the cost of admin work after restart. | Reduces that admin step but introduces another provider/key failure mode; it does not remove protected publication or recovery testing. |
+
+Cloudflare R2 object storage is not itself the AWS KMS seal mechanism. The selected design includes KMS as a dependency; account/region, credentials, actual costs, and resource provisioning are later implementation work. No paid resource or second Vault service has been created during planning.
+
+HashiCorp documents Community seal options and [AWS KMS configuration](https://developer.hashicorp.com/vault/docs/configuration/seal/awskms) with scoped Encrypt/Decrypt/DescribeKey permissions. Verify account, region, credential delivery, key-retention/deletion controls, and cost before provisioning. Current charges are described in [AWS KMS pricing](https://aws.amazon.com/kms/pricing/).
+
+## Selected fallback: rebuild from independently encrypted exports
+
+The owner initially requested AWS KMS with the second server as an unseal fallback, or the reverse. Native fallback between independent seals is an [Enterprise Seal HA feature](https://developer.hashicorp.com/vault/docs/configuration/seal/seal-ha); Community's KMS recovery shares cannot replace an unavailable KMS key. The owner then selected the third offered approach: native AWS KMS for normal unseal and independent recovery exports for rebuilding. Neither an Enterprise license, another Transit service, nor custom Shamir-unseal automation is selected.
+
+The exports must be independent of the failed seal. Encrypt recovery bundles to separately controlled recovery recipients and preserve the required decryption/access material outside Vault and AWS KMS. An opaque Raft snapshot or a bundle whose only decryption route uses the lost KMS key is insufficient for this fallback.
+
+To make the advertised second-server fallback preserve all acknowledged managed changes, the publication workflow must verify the complete encrypted bundle and matching receipt at both R2 and the second-server recovery location before acknowledgment. This adds a concrete prerequisite under the already accepted deferred-change policy. A failed/unavailable destination defers the change and leaves current active inputs intact; it does not weaken the secret recovery target. The database/Pterodactyl outage exception does not apply to these secret publications.
+
+Each protected recovery set must provide managed values and retained version history, canonical bundle IDs, active/pending references, incomplete activation intent, policy/auth/bootstrap configuration needed to reconstruct the managed service, supported input mappings, and matching infrastructure/artifact references. Export the managed scope explicitly; do not assume a KV-only dump captures every recovery dependency. Credential/identity state that can be safely reissued requires a documented procedure and consumer update path. Keep authorization policy and recovery-critical key/configuration changes within the protected completion workflow.
+
+Recovery has two branches:
+
+1. **KMS access can be restored:** keep the original store/snapshot and its exact key/version references; restore authorized key access, unseal, reconcile the publication catalog, and validate before resuming changes.
+2. **The original KMS key/access is permanently unavailable:** preserve the old store as evidence, initialize an isolated fresh Vault with a controlled replacement KMS key and new seal/bootstrap material, decrypt the independent export, reconstruct managed configuration/values, and reconcile active versus pending consumer inputs. Reissue documented identities as needed, verify real consumer access, and only then cut delivery to the rebuilt service. Do not describe this as unsealing the old database or make existing delivered credentials change automatically.
+
+Use the second-server set if it is complete and matches the protected publication catalog; use R2 for off-site recovery after loss of both hosts. Keep access/decryption routes independent of the failed machine and seal. Test the permanent-key-loss branch with the old KMS dependency deliberately unavailable in an isolated fixture; do not delete a real production KMS key as a test.
+
+The storage, copy-protection, retention, and full managed-scope reconstruction mechanisms still require implementation and restore evidence. The owner accepts manual recovery time; no automatic standby or fixed restoration deadline is introduced.
+
+## Remaining proof and progress
+
+Neither profile resolves V-01 by itself. Keep the complete protected-publication and recovery cases in [the secrets design input](secrets-publication.md), plus the privacy and runtime-consumer tests. The independent recovery kit must cover seal/access material, R2 access/decryption, configuration, and usable version references without booting failed infrastructure. Plan redundant independently accessible recovery routes rather than storing the only kit on either server.
+
+The owner decisions are the authority for further Vault design, not a passed deployment test. Continue the Technical Plan's CI authorization/transport, maintenance, telemetry, network, and host sections. Do not re-ask the established product, operating profile, or shared-engine choices unless new evidence makes them infeasible. No new live host inspection, benchmark, deployment, paid resource, or restore operation was performed for this document.
