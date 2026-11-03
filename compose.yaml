@@ -34,6 +34,8 @@ volumes:
     driver: local
   vault-tls:
     driver: local
+  vault-audit:
+    driver: local
 
 services:
   ##################################################################
@@ -49,6 +51,7 @@ services:
     volumes:
       - vault-data:/vault/file
       - vault-tls:/vault/tls
+      - vault-audit:/vault/audit
       - ./infra/certs:/vault/tls-source:ro
       - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
       - ./infra/vault/vault-tls-entrypoint.sh:/usr/local/bin/vault-tls-entrypoint.sh:ro

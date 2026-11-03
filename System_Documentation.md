@@ -336,4 +336,12 @@ docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VE
 docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault login'
 ```
 
-Store the initialization keys and root token outside this repository. The listener is intentionally HTTP because it is loopback-only; place Vault behind TLS before changing the binding to a non-local interface.
+Store the initialization keys and root token outside this repository. Access Vault through its TLS-protected internal hostname; do not expose the service directly on a non-local interface.
+
+After initializing and unsealing Vault, enable the persistent file audit device once:
+
+```sh
+docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault audit enable file file_path=/vault/audit/audit.log'
+```
+
+The audit log is stored in the separate `vault-audit` volume. Audit entries include sensitive metadata; do not expose the volume or log file to untrusted services.
