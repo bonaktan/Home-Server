@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
-# Classify a bounded observation on stdin; destination collection is not yet enrolled.
+# Input must come from a trusted collector; collection is not yet enrolled.
 set -euo pipefail
-exec python3 "$(dirname "$(readlink -f "$0")")/backup_status.py"
+base=$(dirname "$(readlink -f "$0")")
+if [ "$#" -eq 0 ]; then
+  exec python3 "$base/backup_status.py"
+elif [ "$#" -eq 2 ] && [ "$1" = --persist ]; then
+  exec python3 "$base/backup_status_store.py" "$2"
+fi
+printf '%s\n' 'Usage: backup-status.sh [--persist r2|second_server]' >&2
+exit 2
