@@ -13,7 +13,7 @@ services:
       - /etc/letsencrypt/archive:/archive:ro
   prometheus:
     volumes:
-      - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/chain.pem:/etc/prometheus/certs/vault-ca.pem:ro
+      - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/fullchain.pem:/etc/prometheus/certs/vault-ca.pem:ro
   pterodactyl-wings:
     volumes:
       - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
