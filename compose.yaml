@@ -8,6 +8,12 @@ networks:
   pterodactyl:
     external: true
     name: pterodactyl_nw
+  vault:
+    driver: bridge
+  vault_observability:
+    driver: bridge
+  database_observability:
+    driver: bridge
 
 volumes:
   registry-data:
@@ -22,8 +28,46 @@ volumes:
     driver: local
   static-website-data:
     driver: local
+  vault-data:
+    driver: local
 
 services:
+  ##################################################################
+  # Secrets Management
+  ##################################################################
+  vault:
+    image: hashicorp/vault:1.21
+    container_name: infra-vault
+    command: server -config=/vault/config/vault.hcl
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: http://127.0.0.1:8200
+    ports:
+      - "127.0.0.1:8200:8200"
+    volumes:
+      - vault-data:/vault/file
+      - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
+    networks:
+      - vault
+      - vault_observability
+    healthcheck:
+      test: ["CMD-SHELL", "vault status -sealed-code=2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+        labels: service=infra-vault
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256M }
+        reservations: { cpus: "0.1", memory: 128M }
+    restart: always
+
   ##################################################################
   # Shared Cloudflare/nginx
   ##################################################################
@@ -164,6 +208,33 @@ services:
         max-file: "3"
         labels: "service=infra-postgresql_migration"
 
+  postgresql_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: infra-postgresql_exporter
+    environment:
+      DATA_SOURCE_URI: postgresql:5432/${POSTGRES_DB}?sslmode=disable
+      DATA_SOURCE_USER: ${POSTGRES_USER}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+    expose:
+      - "9187"
+    networks:
+      - shared_infra_database
+      - database_observability
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-postgresql_exporter"
+    deploy:
+      resources:
+        limits: {cpus: "0.25", memory: 64M}
+        reservations: {cpus: "0.1", memory: 32M}
+    restart: always
+
   mariadb:
     image: mariadb:11
     container_name: infra-mariadb
@@ -222,6 +293,34 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-postgresql_migration"
+
+  mariadb_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: infra-mariadb_exporter
+    command:
+      - --mysqld.address=mariadb:3306
+      - --mysqld.username=${MARIADB_USER}
+    environment:
+      MYSQLD_EXPORTER_PASSWORD: ${MARIADB_PASSWORD}
+    expose:
+      - "9104"
+    networks:
+      - shared_infra_database
+      - database_observability
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=infra-mariadb_exporter"
+    deploy:
+      resources:
+        limits: {cpus: "0.25", memory: 64M}
+        reservations: {cpus: "0.1", memory: 32M}
+    restart: always
 
   ##################################################################
   # Home Networking
@@ -461,6 +560,8 @@ services:
     networks:
       - shared_infra_net
       - infra_services
+      - vault_observability
+      - database_observability
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:

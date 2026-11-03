@@ -13,6 +13,7 @@ A Centralized Configuration for Home-Server Infrastructure
 - \+ PostgreSQL         (Shared Database)
 - \+ PGAdmin            (Shared Database - Management)
 - \+ Flyway             (Shared Database - General Schema Versioning)
+- \+ HashiCorp Vault     (Dedicated secrets-management network)
 
 ## Version 0.1.0
 ### Client Services

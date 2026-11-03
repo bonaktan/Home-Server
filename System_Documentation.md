@@ -1,7 +1,7 @@
 # Infrastructure Documentation
 
 > **Domain:** `bonnybonnybonaktan.xyz`  
-> **Stack:** Docker Compose · Nginx · Cloudflare Tunnel · PostgreSQL · Pi-hole
+> **Stack:** Docker Compose · Nginx · Cloudflare Tunnel · PostgreSQL · Pi-hole · HashiCorp Vault
 
 ---
 
@@ -18,6 +18,7 @@
    - [Pi-hole](#pi-hole)
    - [Docker Registry](#docker-registry)
    - [Registry UI](#registry-ui)
+   - [HashiCorp Vault](#hashicorp-vault)
 4. [DNS & Routing](#dns--routing)
 5. [TLS / SSL](#tls--ssl)
 6. [Security](#security)
@@ -54,7 +55,7 @@ All inbound traffic is routed through Cloudflare before reaching the server. The
 
 ## Network Topology
 
-Three isolated Docker bridge networks are defined to enforce service separation:
+The primary infrastructure project defines three isolated Docker bridge networks:
 
 | Network | Purpose | Connected Services |
 |---|---|---|
@@ -63,6 +64,8 @@ Three isolated Docker bridge networks are defined to enforce service separation:
 | `shared_infra_database` | Isolated database plane | database, pgadmin, flyway |
 
 Pi-hole runs in **host network mode** so it can bind to the host's port 53 (DNS) and act as a LAN resolver.
+
+Vault runs on its own `vault` bridge network. A second, dedicated `vault_observability` network connects only Vault and Prometheus so Prometheus can scrape Vault telemetry; Vault is not attached to any other service network. PostgreSQL and MariaDB use exporters which join the database network and a dedicated `database_observability` network shared only with Prometheus.
 
 ---
 
@@ -317,3 +320,20 @@ pgAdmin, Flyway, and the database have no explicit resource limits defined.
 | `PGADMIN_PASSWORD` | pgadmin | pgAdmin login password |
 
 All secrets are expected in a `.env` file at the project root (loaded automatically by Docker Compose).
+
+---
+
+## HashiCorp Vault
+
+Vault is part of the main infrastructure Compose project but is deliberately isolated from its other services. It has its own bridge network and `vault-data` volume, and its API/UI is bound only to `127.0.0.1:8200`. Its telemetry endpoint is reachable only by Prometheus over the dedicated `vault_observability` network.
+
+Start it independently:
+
+```sh
+docker compose up -d vault
+docker compose exec vault vault operator init
+docker compose exec vault vault operator unseal
+docker compose exec vault vault login
+```
+
+Store the initialization keys and root token outside this repository. The listener is intentionally HTTP because it is loopback-only; place Vault behind TLS before changing the binding to a non-local interface.
