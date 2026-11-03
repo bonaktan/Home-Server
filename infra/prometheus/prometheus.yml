@@ -16,10 +16,14 @@ scrape_configs:
 
   - job_name: 'vault'
     metrics_path: /v1/sys/metrics
+    scheme: https
     params:
       format: [prometheus]
+    tls_config:
+      ca_file: /etc/prometheus/certs/vault-ca.pem
+      server_name: vault.internal.bonnybonnybonaktan.xyz
     static_configs:
-      - targets: ['vault:8200']
+      - targets: ['vault.internal.bonnybonnybonaktan.xyz:8200']
 
   - job_name: 'postgresql'
     static_configs:

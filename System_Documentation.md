@@ -325,15 +325,15 @@ All secrets are expected in a `.env` file at the project root (loaded automatica
 
 ## HashiCorp Vault
 
-Vault is part of the main infrastructure Compose project but is deliberately isolated from its other services. It has its own bridge network and `vault-data` volume, and its API/UI is bound only to `127.0.0.1:8200`. Its telemetry endpoint is reachable only by Prometheus over the dedicated `vault_observability` network.
+Vault is part of the main infrastructure Compose project but is deliberately isolated from its other services. It has its own bridge network and `vault-data` volume. Its UI/API is available only to `192.168.1.0/24` through `https://vault.internal.bonnybonnybonaktan.xyz`; Nginx and Prometheus both verify Vault's TLS certificate. Its telemetry endpoint is reachable only by Prometheus over the dedicated `vault_observability` network.
 
 Start it independently:
 
 ```sh
 docker compose up -d vault
-docker compose exec vault vault operator init
-docker compose exec vault vault operator unseal
-docker compose exec vault vault login
+docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault operator init'
+docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault operator unseal'
+docker compose exec vault sh -c 'VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault login'
 ```
 
 Store the initialization keys and root token outside this repository. The listener is intentionally HTTP because it is loopback-only; place Vault behind TLS before changing the binding to a non-local interface.

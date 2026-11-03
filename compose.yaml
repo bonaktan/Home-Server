@@ -12,6 +12,8 @@ networks:
     driver: bridge
   vault_observability:
     driver: bridge
+  vault_proxy:
+    driver: bridge
   database_observability:
     driver: bridge
 
@@ -41,18 +43,20 @@ services:
     command: server
     cap_add:
       - IPC_LOCK
-    environment:
-      VAULT_ADDR: http://127.0.0.1:8200
-    ports:
-      - "127.0.0.1:8200:8200"
     volumes:
       - vault-data:/vault/file
       - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
+      - ./infra/certs:/vault/tls:ro
     networks:
-      - vault
-      - vault_observability
+      vault: {}
+      vault_observability:
+        aliases:
+          - vault.internal.bonnybonnybonaktan.xyz
+      vault_proxy:
+        aliases:
+          - vault.internal.bonnybonnybonaktan.xyz
     healthcheck:
-      test: ["CMD-SHELL", "vault status -sealed-code=2"]
+      test: ["CMD-SHELL", "VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault status -sealed-code=2"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -108,6 +112,7 @@ services:
     networks:
       - shared_infra_net
       - pterodactyl
+      - vault_proxy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:
@@ -555,6 +560,7 @@ services:
       - GOMEMLIMIT=230MiB
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/certs/chain.pem:/etc/prometheus/certs/vault-ca.pem:ro
     expose:
       - "9090"
     networks:
