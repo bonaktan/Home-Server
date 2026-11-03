@@ -38,7 +38,7 @@ services:
   vault:
     image: hashicorp/vault:1.21
     container_name: infra-vault
-    command: server -config=/vault/config/vault.hcl
+    command: server
     cap_add:
       - IPC_LOCK
     environment:
@@ -605,7 +605,7 @@ services:
       - '--housekeeping_interval=30s'
       - '--docker_only=true'
       - '--store_container_labels=false'
-      - '--disable_metrics=disk,tcp,udp,percpu,sched,process'
+      - '--disable_metrics=disk,tcp,udp,percpu,sched,process,referenced_memory'
     expose:
       - "8080"
     volumes:
