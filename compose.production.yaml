@@ -10,6 +10,7 @@ services:
   vault:
     volumes:
       - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}:/vault/tls:ro
+      - /etc/letsencrypt/archive:/archive:ro
   prometheus:
     volumes:
       - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/chain.pem:/etc/prometheus/certs/vault-ca.pem:ro
