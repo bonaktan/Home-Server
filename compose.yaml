@@ -32,6 +32,8 @@ volumes:
     driver: local
   vault-data:
     driver: local
+  vault-tls:
+    driver: local
 
 services:
   ##################################################################
@@ -40,13 +42,16 @@ services:
   vault:
     image: hashicorp/vault:1.21
     container_name: infra-vault
+    entrypoint: ["/usr/local/bin/vault-tls-entrypoint.sh"]
     command: server
     cap_add:
       - IPC_LOCK
     volumes:
       - vault-data:/vault/file
+      - vault-tls:/vault/tls
+      - ./infra/certs:/vault/tls-source:ro
       - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
-      - ./infra/certs:/vault/tls:ro
+      - ./infra/vault/vault-tls-entrypoint.sh:/usr/local/bin/vault-tls-entrypoint.sh:ro
     networks:
       vault: {}
       vault_observability:
