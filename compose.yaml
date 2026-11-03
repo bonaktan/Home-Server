@@ -348,6 +348,7 @@ services:
     environment:
       TZ: 'Asia/Manila'
       FTLCONF_webserver_api_password: 'putanginanyo@As1'
+      FTLCONF_webserver_port: '8080'
       FTLCONF_dns_listeningMode: 'ALL'
     volumes:
       - './infra/pihole:/etc/pihole:rw'
