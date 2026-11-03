@@ -1,0 +1,40 @@
+# Preparation only. Enroll a verified digest, paths, permissions and network policy
+# and pass disposable restore/protection tests before starting this service.
+services:
+  backup_storage:
+    image: ${SECOND_REST_SERVER_IMAGE:?Set a reviewed immutable image digest}
+    user: "${SECOND_REST_SERVER_UID:?Set the enrolled service UID}:${SECOND_REST_SERVER_GID:?Set the enrolled service GID}"
+    env_file:
+      - ./infra/backup/rest-server.conf
+    environment:
+      DISABLE_AUTHENTICATION: ""
+    volumes:
+      - type: bind
+        source: ${SECOND_BACKUP_DATA_PATH:?Set the enrolled persistent repository directory}
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SECOND_BACKUP_AUTH_FILE:?Set the protected htpasswd path}
+        target: /run/rest-server/htpasswd
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SECOND_BACKUP_TLS_CERT:?Set the protected TLS certificate path}
+        target: /run/rest-server/tls.crt
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${SECOND_BACKUP_TLS_KEY:?Set the protected TLS key path}
+        target: /run/rest-server/tls.key
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      - "${SECOND_TAILSCALE_IP:?Set the verified second-host Tailscale IP}:18000:8000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
