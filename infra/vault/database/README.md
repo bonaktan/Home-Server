@@ -4,10 +4,16 @@ This is a staged migration for PostgreSQL 18, MariaDB 11 and Vault 1.21. Nothing
 here deploys to a server automatically. Back up both databases and Vault before
 running the cutover. Use Docker Compose v2 with `!override` support, Python 3 and OpenSSL.
 
-The existing MariaDB V1 had invalid `IDENTIFIED AS` syntax; it is corrected to
-`IDENTIFIED BY` so fresh installations can migrate. If your Flyway history already
-records V1, inspect that history and the actual schema before reconciling the V1
-checksum with `flyway repair`. Never repair a failed/partial migration blindly.
+MariaDB V1 is preserved exactly as originally applied, with Flyway checksum
+`-2027749246`. Later edits to its password clause caused checksum mismatches;
+those edits have been reverted. An existing database recording `-2027749246`
+can migrate without repairing its history. Never edit an applied migration to
+change a password; use Vault or a new versioned migration.
+
+An environment that already recorded an edited V1 (for example `-27116424`)
+needs separate review before reconciling its history with `flyway repair`.
+Repair updates migration metadata; it does not apply the SQL differences.
+Do not repair a failed/partial migration blindly or disable checksum validation.
 
 Vault gets a dedicated `vault_manager` account in each database, never the
 database bootstrap/root account. V2 creates these accounts without usable
