@@ -172,7 +172,7 @@ Do not delete its APP_KEY or other application settings.
 Database initialization and infrastructure Flyway jobs retain the emergency
 administrator credentials from `.env`. Those are provisioning identities, not
 runtime service identities, and are intentionally outside dynamic application
-leasing. Remove `.env` access from application containers. pgAdmin is an interactive
+leasing. Remove `.env` access from application containers. CloudBeaver is an interactive
 tool: users obtain their own scoped credentials rather than a shared superuser login.
 Services without database access need no database ACL policy.
 

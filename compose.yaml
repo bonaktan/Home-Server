@@ -27,6 +27,8 @@ volumes:
     driver: local
   postgresql-data:
     driver: local
+  cloudbeaver-data:
+    driver: local
   mariadb-data:
     driver: local
   panel-cache-data:
@@ -198,27 +200,30 @@ services:
       - sh
       - /etc/database-tls-entrypoint.sh
 
-  postgresql_pgadmin:
-    image: dpage/pgadmin4
-    container_name: infra-postgresql_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:26.2.2
+    container_name: infra-cloudbeaver
+    volumes:
+      - cloudbeaver-data:/opt/cloudbeaver/workspace
+      - ./infra/cloudbeaver/data-sources.json:/opt/cloudbeaver/workspace/GlobalConfiguration/.dbeaver/data-sources.json:ro
+      - ./infra/vault/private/database-tls/ca.pem:/etc/cloudbeaver/database-ca.pem:ro
     networks:
       - shared_infra_net
       - shared_infra_database
     depends_on:
       postgresql:
         condition: service_healthy
+      mariadb:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service=infra-postgresql_pgadmin"
+        labels: "service=infra-cloudbeaver"
     deploy:
       resources:
-        limits: {cpus: "0.5", memory: 512M}
+        limits: {cpus: "1.0", memory: 768M}
         reservations: {cpus: "0.1", memory: 256M}
     restart: always
 

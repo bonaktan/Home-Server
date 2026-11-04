@@ -13,7 +13,7 @@
    - [Cloudflare Tunnel](#cloudflare-tunnel)
    - [Nginx Reverse Proxy](#nginx-reverse-proxy)
    - [PostgreSQL Database](#postgresql-database)
-   - [pgAdmin](#pgadmin)
+   - [CloudBeaver](#cloudbeaver)
    - [Flyway Migrations](#flyway-migrations)
    - [Pi-hole](#pi-hole)
    - [Docker Registry](#docker-registry)
@@ -40,7 +40,7 @@ Cloudflare (CDN / DDoS protection)
    ▼
 Nginx (reverse proxy, TLS termination)
    ├── registry.bonnybonnybonaktan.xyz      → Docker Registry + UI
-   ├── pgadmin.internal.bonnybonnybonaktan.xyz → pgAdmin 4
+   ├── pgadmin.internal.bonnybonnybonaktan.xyz → CloudBeaver
    └── pihole.internal.bonnybonnybonaktan.xyz  → Pi-hole Web UI
 
 PostgreSQL (shared DB, isolated network)
@@ -59,9 +59,9 @@ The primary infrastructure project defines three isolated Docker bridge networks
 
 | Network | Purpose | Connected Services |
 |---|---|---|
-| `shared_infra_net` | Public-facing traffic plane | nginx, cloudflared, pgadmin, registry, registry-ui |
+| `shared_infra_net` | Public-facing traffic plane | nginx, cloudflared, cloudbeaver, registry, registry-ui |
 | `infra_services` | Internal registry communication | registry, registry-ui |
-| `shared_infra_database` | Isolated database plane | database, pgadmin, flyway |
+| `shared_infra_database` | Isolated database plane | databases, cloudbeaver, flyway |
 
 Pi-hole runs in **host network mode** so it can bind to the host's port 53 (DNS) and act as a LAN resolver.
 
@@ -121,16 +121,16 @@ Health check runs `pg_isready` every 10 seconds; dependent services wait for a h
 
 ---
 
-### pgAdmin
+### CloudBeaver
 
 | Property | Value |
 |---|---|
-| Image | `dpage/pgadmin4` |
-| Container | `infra-database_pgadmin` |
+| Image | `dbeaver/cloudbeaver:26.2.2` |
+| Container | `infra-cloudbeaver` |
 | Networks | `shared_infra_net`, `shared_infra_database` |
 | URL | `https://pgadmin.internal.bonnybonnybonaktan.xyz` |
 
-Web-based PostgreSQL administration UI. Sits on both networks so it can serve the web UI through nginx while reaching the database on the isolated network. Caching is disabled at the proxy layer (`proxy_no_cache`).
+Web-based PostgreSQL and MariaDB administration UI. Complete the administrator setup on first access. Both connection definitions use certificate and hostname verification with the database CA. Enter authorized database credentials in CloudBeaver; no database passwords are shipped in the definitions. PostgreSQL starts with the `postgres` database selected. The shared connection definitions are mounted read-only from `infra/cloudbeaver/data-sources.json`; edit that file to change them. Other workspace data persists in `cloudbeaver-data`.
 
 ---
 
@@ -205,7 +205,7 @@ Web UI for browsing and managing images in the private registry. Communicates wi
 | Hostname | Visibility | Backend |
 |---|---|---|
 | `registry.bonnybonnybonaktan.xyz` | Public | registry-ui / registry API |
-| `pgadmin.internal.bonnybonnybonaktan.xyz` | Internal | pgadmin container |
+| `pgadmin.internal.bonnybonnybonaktan.xyz` | Internal | CloudBeaver container |
 | `pihole.internal.bonnybonnybonaktan.xyz` | Internal | Pi-hole web UI (host:8080) |
 
 The `*.internal.*` subdomain is intended for LAN-only access. TLS certificates are issued separately for the internal subdomain.
@@ -224,7 +224,7 @@ The `*.internal.*` subdomain is intended for LAN-only access. TLS certificates a
 
 Two certificate sets are mounted into nginx:
 - `bonnybonnybonaktan.xyz` — used for public-facing services (registry)
-- `internal.bonnybonnybonaktan.xyz` — used for internal services (pgadmin, pihole)
+- `internal.bonnybonnybonaktan.xyz` — used for internal services (CloudBeaver, pihole)
 
 Certificates are stored in `./infra/certs/` and mounted read-only.
 
@@ -289,7 +289,7 @@ Logs are written to `/var/log/nginx/access.log` (access) and `/var/log/nginx/err
 | registry | 1 | 256 MB | 0.25 | 32 MB |
 | registry-ui | 0.5 | 64 MB | 0.25 | 32 MB |
 
-pgAdmin, Flyway, and the database have no explicit resource limits defined.
+CloudBeaver is limited to 1 CPU and 768 MB of memory.
 
 ---
 
@@ -299,6 +299,7 @@ pgAdmin, Flyway, and the database have no explicit resource limits defined.
 |---|---|---|---|
 | `registry-data` | `/var/lib/registry` | registry | Docker image layers |
 | `database-data` | `/var/lib/postgresql` | database | PostgreSQL data files |
+| `cloudbeaver-data` | `/opt/cloudbeaver/workspace` | cloudbeaver | Users, settings, and saved connections |
 | `./infra/pihole` | `/etc/pihole` | pihole | Pi-hole config & blocklists |
 | `./infra/migration/sql` | `/flyway/sql` | flyway | SQL migration scripts |
 | `./infra/registry/auth` | `/auth` | registry | htpasswd auth file |
@@ -316,8 +317,6 @@ pgAdmin, Flyway, and the database have no explicit resource limits defined.
 | `POSTGRES_USER` | database, flyway | DB superuser username |
 | `POSTGRES_PASSWORD` | database, flyway | DB superuser password |
 | `POSTGRES_DB` | database, flyway | Default database name |
-| `PGADMIN_EMAIL` | pgadmin | pgAdmin login email |
-| `PGADMIN_PASSWORD` | pgadmin | pgAdmin login password |
 
 All secrets are expected in a `.env` file at the project root (loaded automatically by Docker Compose).
 

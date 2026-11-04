@@ -14,7 +14,7 @@ Database credential migration and per-service Vault ACL policies:
 ## Version 0.2.0
 ### Infrastructure Services
 - \+ PostgreSQL         (Shared Database)
-- \+ PGAdmin            (Shared Database - Management)
+- \+ CloudBeaver        (Shared Database - Management)
 - \+ Flyway             (Shared Database - General Schema Versioning)
 - \+ HashiCorp Vault     (Dedicated secrets-management network)
 
