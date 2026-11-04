@@ -1,6 +1,9 @@
 # Home-Server - Infrastructure
 A Centralized Configuration for Home-Server Infrastructure
 
+Database credential migration and per-service Vault ACL policies:
+[Vault database setup](infra/vault/database/README.md).
+
 ## Principles
 * Single Git repository as the source of truth
 * No service is configured manually — everything is code

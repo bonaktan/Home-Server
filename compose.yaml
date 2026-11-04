@@ -17,6 +17,11 @@ networks:
   database_observability:
     driver: bridge
 
+  vault_database:
+    internal: true
+  vault_clients:
+    internal: true
+
 volumes:
   registry-data:
     driver: local
@@ -55,6 +60,7 @@ services:
       - ./infra/certs:/vault/tls-source:ro
       - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
       - ./infra/vault/vault-tls-entrypoint.sh:/usr/local/bin/vault-tls-entrypoint.sh:ro
+      - ./infra/vault/private/database-tls/ca.pem:/vault/database-ca.pem:ro
     networks:
       vault: {}
       vault_observability:
@@ -63,8 +69,12 @@ services:
       vault_proxy:
         aliases:
           - vault.internal.bonnybonnybonaktan.xyz
+      vault_clients:
+        aliases:
+          - vault.internal.bonnybonnybonaktan.xyz
+      vault_database: {}
     healthcheck:
-      test: ["CMD-SHELL", "VAULT_ADDR=https://127.0.0.1:8200 VAULT_SKIP_VERIFY=true vault status -sealed-code=2"]
+      test: ["CMD-SHELL", "VAULT_ADDR=https://127.0.0.1:8200 VAULT_CACERT=/vault/tls/fullchain.pem VAULT_TLS_SERVER_NAME=vault.internal.bonnybonnybonaktan.xyz vault status"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -150,8 +160,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - shared_infra_database
+      - vault_database
     volumes:
       - postgresql-data:/var/lib/postgresql
+      - ./infra/vault/private/database-tls/postgresql:/tls-source:ro
+      - ./infra/vault/database/tls-entrypoint.sh:/etc/database-tls-entrypoint.sh:ro
+      - ./infra/vault/database/postgresql-hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
       interval: 10s
@@ -168,6 +182,21 @@ services:
         max-file: "3"
         labels: "service=infra-postgresql"
     restart: always
+    tmpfs:
+      - /run/database-tls
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/run/database-tls/server.pem
+      - -c
+      - ssl_key_file=/run/database-tls/server-key.pem
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+    entrypoint:
+      - sh
+      - /etc/database-tls-entrypoint.sh
 
   postgresql_pgadmin:
     image: dpage/pgadmin4
@@ -222,17 +251,16 @@ services:
         labels: "service=infra-postgresql_migration"
 
   postgresql_exporter:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: home-server/postgresql-exporter-vault:local
     container_name: infra-postgresql_exporter
     environment:
-      DATA_SOURCE_URI: postgresql:5432/${POSTGRES_DB}?sslmode=disable
-      DATA_SOURCE_USER: ${POSTGRES_USER}
-      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+      DATA_SOURCE_URI: postgresql:5432/${POSTGRES_DB}?sslmode=verify-full&sslrootcert=/etc/vault-agent/database-ca.pem
     expose:
       - "9187"
     networks:
       - shared_infra_database
       - database_observability
+      - vault_clients
     depends_on:
       postgresql:
         condition: service_healthy
@@ -244,9 +272,20 @@ services:
         labels: "service=infra-postgresql_exporter"
     deploy:
       resources:
-        limits: {cpus: "0.25", memory: 64M}
+        limits: {cpus: "0.25", memory: 192M}
         reservations: {cpus: "0.1", memory: 32M}
     restart: always
+    build:
+      context: ./infra/vault/agent
+      args:
+        SERVICE_IMAGE: prometheuscommunity/postgres-exporter:latest
+      target: service
+    init: true
+    volumes:
+      - ./infra/vault/agent/postgresql-exporter.hcl:/etc/vault-agent/agent.hcl:ro
+      - ./infra/certs/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
+      - ./infra/vault/private/database-tls/ca.pem:/etc/vault-agent/database-ca.pem:ro
+      - ./infra/vault/private/approle/postgresql-exporter:/run/vault-auth:ro
 
   mariadb:
     image: mariadb:11
@@ -256,6 +295,8 @@ services:
       - "3306"
     volumes:
       - mariadb-data:/var/lib/mysql:rw
+      - ./infra/vault/private/database-tls/mariadb:/tls-source:ro
+      - ./infra/vault/database/tls-entrypoint.sh:/etc/database-tls-entrypoint.sh:ro
     environment:
       MYSQL_DATABASE: ${MARIADB_DB}
       MYSQL_USER: ${MARIADB_USER}
@@ -263,6 +304,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     networks:
       - shared_infra_database
+      - vault_database
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -279,6 +321,16 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-mariadb"
+    tmpfs:
+      - /run/database-tls
+    command:
+      - mariadbd
+      - --ssl-cert=/run/database-tls/server.pem
+      - --ssl-key=/run/database-tls/server-key.pem
+    entrypoint:
+      - sh
+      - /etc/database-tls-entrypoint.sh
+
   mariadb_migration:
     image: flyway/flyway:10
     container_name: infra-mariadb_migration
@@ -308,18 +360,15 @@ services:
         labels: "service=infra-postgresql_migration"
 
   mariadb_exporter:
-    image: prom/mysqld-exporter:latest
+    image: home-server/mariadb-exporter-vault:local
     container_name: infra-mariadb_exporter
-    command:
-      - --mysqld.address=mariadb:3306
-      - --mysqld.username=${MARIADB_USER}
-    environment:
-      MYSQLD_EXPORTER_PASSWORD: ${MARIADB_PASSWORD}
+    command: []
     expose:
       - "9104"
     networks:
       - shared_infra_database
       - database_observability
+      - vault_clients
     depends_on:
       mariadb:
         condition: service_healthy
@@ -331,9 +380,21 @@ services:
         labels: "service=infra-mariadb_exporter"
     deploy:
       resources:
-        limits: {cpus: "0.25", memory: 64M}
+        limits: {cpus: "0.25", memory: 192M}
         reservations: {cpus: "0.1", memory: 32M}
     restart: always
+    build:
+      context: ./infra/vault/agent
+      args:
+        SERVICE_IMAGE: prom/mysqld-exporter:latest
+      target: service
+    init: true
+    volumes:
+      - ./infra/vault/agent/mariadb-exporter.hcl:/etc/vault-agent/agent.hcl:ro
+      - ./infra/vault/agent/mysql.cnf:/etc/vault-agent/mysql.cnf:ro
+      - ./infra/certs/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
+      - ./infra/vault/private/database-tls/ca.pem:/etc/vault-agent/database-ca.pem:ro
+      - ./infra/vault/private/approle/mariadb-exporter:/run/vault-auth:ro
 
   ##################################################################
   # Home Networking
@@ -407,7 +468,7 @@ services:
         max-file: "3"
         labels: "service=infra-redis"
   pterodactyl:
-    image: ghcr.io/pterodactyl/panel:latest
+    image: home-server/pterodactyl-vault:local
     container_name: infra-pterodactyl
     restart: always
     expose:
@@ -416,19 +477,24 @@ services:
       - infra_services
       - shared_infra_net
       - shared_infra_database
+      - vault_clients
     volumes:
       - ./infra/pterodactyl/var/:/app/var:rw
       - ./infra/pterodactyl/etc:/etc/pterodactyl:rw
       - ./infra/pterodactyl/nginx/:/etc/nginx/http.d:rw
+      - ./infra/vault/agent/pterodactyl.hcl:/etc/vault-agent/agent.hcl:ro
+      - ./infra/vault/agent/panel-start.sh:/etc/vault-agent/panel-start.sh:ro
+      - ./infra/certs/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
+      - ./infra/vault/private/database-tls/ca.pem:/etc/vault-agent/database-ca.pem:ro
+      - ./infra/vault/private/approle/pterodactyl:/run/vault-auth:ro
     environment:
       APP_URL: "http://hosting.bonnybonnybonaktan.xyz"
       APP_TIMEZONE: "Asia/Manila"
       APP_SERVICE_AUTHOR: "noreply@hosting.bonnybonnybonaktan.xyz"
       MAIL_FROM: "noreply@hosting.bonnybonnybonaktan.xyz"
       MAIL_DRIVER: "log"
-      DB_PASSWORD: "pterodactyl"
       APP_ENV: "production"
-      APP_ENVIRONMENT_ONLY: "false"
+      APP_ENVIRONMENT_ONLY: 'true'
       CACHE_DRIVER: "redis"
       SESSION_DRIVER: "redis"
       QUEUE_DRIVER: "redis"
@@ -436,6 +502,9 @@ services:
       DB_HOST: "mariadb"
       DB_PORT: "3306"
       HASHIDS_LENGTH: 8
+      MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: 'true'
+      DB_DATABASE: panel
+      MYSQL_ATTR_SSL_CA: /etc/vault-agent/database-ca.pem
     depends_on:
       mariadb:
         condition: service_healthy
@@ -443,7 +512,7 @@ services:
         condition: service_healthy
     deploy:
       resources:
-        limits: {cpus: "0.5", memory: 384M}
+        limits: {cpus: "0.5", memory: 512M}
         reservations: {cpus: "0.25", memory: 192M}
     logging:
       driver: "json-file"
@@ -451,6 +520,14 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-pterodactyl"
+    build:
+      context: ./infra/vault/agent
+      args:
+        SERVICE_IMAGE: ghcr.io/pterodactyl/panel:latest
+      target: panel
+    stop_grace_period: 45s
+    init: true
+
   pterodactyl-wings:
     image: ghcr.io/pterodactyl/wings:latest
     container_name: infra-pterodactyl-wings

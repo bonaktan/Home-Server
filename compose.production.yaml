@@ -1,8 +1,6 @@
 services:
   nginx:
     volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
       - /etc/letsencrypt/archive/${ROOT_DOMAIN}:/etc/letsencrypt/archive/bonnybonnybonaktan.xyz:ro
       - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}:/etc/letsencrypt/live/internal.bonnybonnybonaktan.xyz:ro
@@ -14,6 +12,15 @@ services:
   prometheus:
     volumes:
       - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/fullchain.pem:/etc/prometheus/certs/vault-ca.pem:ro
+  postgresql_exporter:
+    volumes:
+      - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
+  mariadb_exporter:
+    volumes:
+      - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
+  pterodactyl:
+    volumes:
+      - /etc/letsencrypt/live/internal.${ROOT_DOMAIN}/fullchain.pem:/etc/vault-agent/vault-ca.pem:ro
   pterodactyl-wings:
     volumes:
       - /etc/letsencrypt/live/${ROOT_DOMAIN}:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro

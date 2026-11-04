@@ -1,28 +1,53 @@
 services:
+  cloudflared:
+    profiles: [tunnel]
   nginx:
+    depends_on:
+      cloudflared:
+        condition: service_started
+        required: false
+    ports: !override
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+    volumes:
+      - ./infra/nginx/staging/lan-access.conf:/etc/nginx/conf.d/filters/lan-access.conf:ro
+      - ./infra/nginx/staging/pihole-upstream.conf:/etc/nginx/conf.d/filters/pihole-upstream.conf:ro
+      - ./infra/certs/fullchain.pem:/etc/ssl/certs/ca-certificates.crt:ro
+  pihole:
+    network_mode: !reset null
+    cap_add: !reset []
+    networks:
+      - shared_infra_net
     ports:
-      - 80:80
-      - 443:443
-      - 8081:8080
+      - 127.0.0.1:8082:8080
   postgresql:
     ports:
       - 127.0.0.1:5432:5432
   mariadb:
     ports:
-      - 3306:3306
+      - 127.0.0.1:3306:3306
   panel-cache:
     ports:
-      - 6379:6379
+      - 127.0.0.1:6379:6379
   pterodactyl:
     ports:
-      - 81:80
+      - 127.0.0.1:81:80
+    volumes:
+      - ./infra/certs/fullchain.pem:/usr/local/share/ca-certificates/staging.crt:ro
   pterodactyl-wings:
+    networks:
+      infra_services:
+        aliases:
+          - homeservernode.bonnybonnybonaktan.xyz
     ports:
-      - "8080:8080"
-      - "2022:2022"
+      - 127.0.0.1:8080:8443
+      - 127.0.0.1:2022:2022
+    volumes:
+      - ./infra/vault/private/wings:/etc/pterodactyl:rw
+      - ./infra/certs:/etc/letsencrypt/live/bonnybonnybonaktan.xyz:ro
   grafana:
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
   prometheus:
     ports:
-      - 9090:9090
+      - 127.0.0.1:9090:9090

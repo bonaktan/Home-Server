@@ -1,4 +1,6 @@
 .env
+infra/vault/private/
+infra/vault/**/__pycache__/
 
 infra/registry/auth/*
 infra/certs/*.pem

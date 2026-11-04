@@ -65,7 +65,7 @@ The primary infrastructure project defines three isolated Docker bridge networks
 
 Pi-hole runs in **host network mode** so it can bind to the host's port 53 (DNS) and act as a LAN resolver.
 
-Vault runs on its own `vault` bridge network. A second, dedicated `vault_observability` network connects only Vault and Prometheus so Prometheus can scrape Vault telemetry; Vault is not attached to any other service network. PostgreSQL and MariaDB use exporters which join the database network and a dedicated `database_observability` network shared only with Prometheus.
+Vault runs on its own `vault` bridge network. A second, dedicated `vault_observability` network connects only Vault and Prometheus so Prometheus can scrape Vault telemetry. The shared [dynamic database credential configuration](infra/vault/database/README.md) in `compose.yaml` adds separate `vault_database` and `vault_clients` networks for database management and authenticated Agent access. PostgreSQL and MariaDB use exporters which join the database network and a dedicated `database_observability` network shared only with Prometheus.
 
 ---
 
