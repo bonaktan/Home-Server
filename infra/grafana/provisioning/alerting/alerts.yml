@@ -1,9 +1,9 @@
 apiVersion: 1
 groups:
 - orgId: 1
-  name: Home Server
+  name: Home Server critical
   folder: Home Server
-  interval: 1m
+  interval: 5m
   rules:
   - uid: target-down
     title: Prometheus target down
@@ -16,7 +16,7 @@ groups:
       datasourceUid: prometheus-bonny
       model:
         refId: A
-        expr: up == 0
+        expr: up
         instant: true
         range: false
         intervalMs: 1000
@@ -28,29 +28,177 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A == 0
     noDataState: OK
     execErrState: Error
     for: 5m
     annotations:
-      summary: A monitored Prometheus target cannot be scraped.
+      summary: Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
-      severity: warning
+      severity: critical
     isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+  - uid: database-down
+    title: Database unavailable
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: pg_up == 0 or mysql_up == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: math
+        expression: $A > -1
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: A database exporter cannot reach its database.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
+    labels:
+      severity: critical
+    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+  - uid: vault-sealed
+    title: Vault sealed
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: vault_core_unsealed == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: math
+        expression: $A > -1
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: Vault reports that it is sealed.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
+    labels:
+      severity: critical
+    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+  - uid: nginx-down
+    title: Nginx unavailable
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: nginx_up == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: math
+        expression: $A > -1
+    noDataState: OK
+    execErrState: Error
+    for: 2m
+    annotations:
+      summary: The Nginx exporter cannot reach Nginx.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
+    labels:
+      severity: critical
+    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+  - uid: battery-critical
+    title: Battery critically low
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: node_power_supply_capacity
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: math
+        expression: $A < 10
+    noDataState: OK
+    execErrState: Error
+    for: 0s
+    annotations:
+      summary: Battery {{ $labels.power_supply }} below 10%
+      description: 'Host {{ $labels.instance }} battery charge: {{ $values.A.Value
+        }}%. Check the power adapter and Server overview dashboard.'
+    labels:
+      severity: critical
+    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+- orgId: 1
+  name: Home Server warning
+  folder: Home Server
+  interval: 10m
+  rules:
   - uid: node-cpu
     title: Host CPU high
     condition: B
@@ -74,29 +222,21 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A > -1
     noDataState: OK
     execErrState: Error
     for: 10m
     annotations:
       summary: Host CPU has been above 90%.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
       severity: warning
     isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
   - uid: node-memory
     title: Host memory high
     condition: B
@@ -120,29 +260,21 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A > -1
     noDataState: OK
     execErrState: Error
     for: 10m
     annotations:
       summary: Host memory usage has been above 90%.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
       severity: warning
     isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
   - uid: disk-space
     title: Filesystem almost full
     condition: B
@@ -168,29 +300,21 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A > -1
     noDataState: OK
     execErrState: Error
     for: 10m
     annotations:
       summary: Filesystem has less than 10% available.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
       severity: warning
     isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
   - uid: container-memory
     title: Container memory near limit
     condition: B
@@ -215,167 +339,21 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A > -1
     noDataState: OK
     execErrState: Error
     for: 10m
     annotations:
       summary: Container working set exceeds 90% of its configured memory limit.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
       severity: warning
     isPaused: false
-  - uid: database-down
-    title: Database unavailable
-    condition: B
-    data:
-    - refId: A
-      relativeTimeRange:
-        from: 600
-        to: 0
-      datasourceUid: prometheus-bonny
-      model:
-        refId: A
-        expr: pg_up == 0 or mysql_up == 0
-        instant: true
-        range: false
-        intervalMs: 1000
-        maxDataPoints: 43200
-    - refId: B
-      relativeTimeRange:
-        from: 0
-        to: 0
-      datasourceUid: __expr__
-      model:
-        refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
-    noDataState: OK
-    execErrState: Error
-    for: 5m
-    annotations:
-      summary: A database exporter cannot reach its database.
-    labels:
-      severity: warning
-    isPaused: false
-  - uid: vault-sealed
-    title: Vault sealed
-    condition: B
-    data:
-    - refId: A
-      relativeTimeRange:
-        from: 600
-        to: 0
-      datasourceUid: prometheus-bonny
-      model:
-        refId: A
-        expr: vault_core_unsealed == 0
-        instant: true
-        range: false
-        intervalMs: 1000
-        maxDataPoints: 43200
-    - refId: B
-      relativeTimeRange:
-        from: 0
-        to: 0
-      datasourceUid: __expr__
-      model:
-        refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
-    noDataState: OK
-    execErrState: Error
-    for: 5m
-    annotations:
-      summary: Vault reports that it is sealed.
-    labels:
-      severity: warning
-    isPaused: false
-  - uid: nginx-down
-    title: Nginx unavailable
-    condition: B
-    data:
-    - refId: A
-      relativeTimeRange:
-        from: 600
-        to: 0
-      datasourceUid: prometheus-bonny
-      model:
-        refId: A
-        expr: nginx_up == 0
-        instant: true
-        range: false
-        intervalMs: 1000
-        maxDataPoints: 43200
-    - refId: B
-      relativeTimeRange:
-        from: 0
-        to: 0
-      datasourceUid: __expr__
-      model:
-        refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
-    noDataState: OK
-    execErrState: Error
-    for: 2m
-    annotations:
-      summary: The Nginx exporter cannot reach Nginx.
-    labels:
-      severity: warning
-    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
   - uid: nginx-5xx
     title: Nginx elevated 5xx rate
     condition: B
@@ -400,26 +378,55 @@ groups:
       datasourceUid: __expr__
       model:
         refId: B
-        type: classic_conditions
-        conditions:
-        - type: query
-          query:
-            params:
-            - A
-          reducer:
-            type: last
-            params: []
-          evaluator:
-            type: gt
-            params:
-            - -1
-          operator:
-            type: and
+        type: math
+        expression: $A > -1
     noDataState: OK
     execErrState: Error
     for: 5m
     annotations:
       summary: More than 5% of Nginx requests returned HTTP 5xx.
+      description: 'Instance: {{ $labels.instance }}. Job: {{ $labels.job }}. Container:
+        {{ $labels.name }}. Filesystem: {{ $labels.mountpoint }}. See the Home Server
+        dashboards for details.'
     labels:
       severity: warning
     isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"
+  - uid: battery-low
+    title: Battery low
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: node_power_supply_capacity
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: math
+        expression: $A < 20
+    noDataState: OK
+    execErrState: Error
+    for: 0s
+    annotations:
+      summary: Battery {{ $labels.power_supply }} below 20%
+      description: 'Host {{ $labels.instance }} battery charge: {{ $values.A.Value
+        }}%. Check the power adapter and Server overview dashboard.'
+    labels:
+      severity: warning
+    isPaused: false
+    notification_settings:
+      receiver: "Bonny's Devsite / Aki's Server - Grafana Webhook"

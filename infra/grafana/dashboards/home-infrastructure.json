@@ -5,17 +5,30 @@
     "home-server"
   ],
   "schemaVersion": 39,
-  "version": 1,
-  "refresh": "1m",
+  "version": 3,
+  "refresh": "30s",
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "panels": [
     {
-      "title": "CPU busy",
-      "description": "",
-      "type": "timeseries",
+      "id": 200,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Processor usage",
+      "description": "Percentage of host CPU in use. Sustained usage above 90% triggers a warning.",
+      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-bonny"
@@ -34,31 +47,56 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "noValue": "No data",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         }
       },
-      "id": 1,
+      "id": 2,
       "gridPos": {
         "x": 0,
-        "y": 0,
-        "w": 12,
-        "h": 8
+        "y": 1,
+        "w": 5,
+        "h": 4
       }
     },
     {
-      "title": "Memory used",
-      "description": "",
-      "type": "timeseries",
+      "title": "Memory usage",
+      "description": "Share of physical RAM unavailable for new work. Includes memory used by applications.",
+      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-bonny"
@@ -77,31 +115,56 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "noValue": "No data",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         }
       },
-      "id": 2,
+      "id": 3,
       "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
-        "h": 8
+        "x": 5,
+        "y": 1,
+        "w": 5,
+        "h": 4
       }
     },
     {
-      "title": "Filesystem used",
-      "description": "",
-      "type": "timeseries",
+      "title": "Disk space used",
+      "description": "Space used per mounted filesystem. Over 90% used triggers a warning.",
+      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-bonny"
@@ -120,30 +183,544 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit"
+          "unit": "percentunit",
+          "noValue": "No data",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 10,
+        "y": 1,
+        "w": 5,
+        "h": 4
+      }
+    },
+    {
+      "title": "Battery remaining",
+      "description": "Battery charge reported by Linux. No data means no supported battery was detected. Warnings below 20%; critical below 10%.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_power_supply_capacity",
+          "legendFormat": "{{power_supply}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "green",
+                "value": 20
+              }
+            ]
+          },
+          "noValue": "No data",
+          "decimals": 1,
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "id": 1,
+      "gridPos": {
+        "x": 15,
+        "y": 1,
+        "w": 5,
+        "h": 4
+      }
+    },
+    {
+      "id": 201,
+      "type": "row",
+      "title": "Service Health",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Can Prometheus collect each service?",
+      "description": "HEALTHY means the scrape succeeded. DOWN means collection failed; check Prometheus Targets for the last error.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-bonny"
+          },
+          "legendFormat": "{{job}} / {{instance}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN / SEALED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "id": 6,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 5
+      }
+    },
+    {
+      "title": "Can the databases accept connections?",
+      "description": "Database connectivity reported by each database exporter.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "pg_up or mysql_up",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-bonny"
+          },
+          "legendFormat": "{{job}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN / SEALED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "id": 7,
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 6,
+        "h": 5
+      }
+    },
+    {
+      "title": "Vault availability",
+      "description": "HEALTHY means Vault is unsealed. DOWN / SEALED means it cannot serve secrets.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "vault_core_unsealed",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-bonny"
+          },
+          "legendFormat": "Vault unsealed",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN / SEALED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "id": 9,
+      "gridPos": {
+        "x": 18,
+        "y": 6,
+        "w": 6,
+        "h": 5
+      }
+    },
+    {
+      "id": 202,
+      "type": "row",
+      "title": "CPU",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Work waiting for CPU",
+      "description": "Linux load averages over 1, 5 and 15 minutes. Compare these values with the number of CPU cores.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_load1",
+          "legendFormat": "1 minute",
+          "range": true
+        },
+        {
+          "refId": "B",
+          "expr": "node_load5",
+          "legendFormat": "5 minutes",
+          "range": true
+        },
+        {
+          "refId": "C",
+          "expr": "node_load15",
+          "legendFormat": "15 minutes",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
-      "id": 3,
+      "id": 10,
       "gridPos": {
         "x": 0,
-        "y": 8,
-        "w": 12,
+        "y": 12,
+        "w": 24,
         "h": 8
       }
     },
     {
-      "title": "Host network traffic",
-      "description": "",
+      "id": 203,
+      "type": "row",
+      "title": "Memory",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Available and total RAM",
+      "description": "Available RAM can be used by applications without swapping.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_memory_MemAvailable_bytes",
+          "legendFormat": "Available RAM",
+          "range": true
+        },
+        {
+          "refId": "B",
+          "expr": "node_memory_MemTotal_bytes",
+          "legendFormat": "Installed RAM",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "id": 11,
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 8
+      }
+    },
+    {
+      "id": 204,
+      "type": "row",
+      "title": "Network",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Network download speed",
+      "description": "Incoming traffic on physical and tunnel interfaces, in bytes per second.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -163,116 +740,66 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "id": 4,
-      "gridPos": {
-        "x": 12,
-        "y": 8,
-        "w": 12,
-        "h": 8
-      }
-    },
-    {
-      "title": "Scrape target health",
-      "description": "",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-bonny"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "up",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
+          "unit": "Bps",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
           },
-          "legendFormat": "{{job}} / {{instance}}",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
       "id": 5,
       "gridPos": {
         "x": 0,
-        "y": 16,
-        "w": 12,
+        "y": 30,
+        "w": 24,
         "h": 8
       }
     },
     {
-      "title": "Database health",
-      "description": "",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-bonny"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "pg_up or mysql_up",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
-          },
-          "legendFormat": "{{job}}",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "id": 6,
+      "id": 205,
+      "type": "row",
+      "title": "Databases",
+      "collapsed": false,
       "gridPos": {
-        "x": 12,
-        "y": 16,
-        "w": 12,
-        "h": 8
-      }
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
     },
     {
-      "title": "Database connections",
-      "description": "",
+      "title": "Open database connections",
+      "description": "Connections grouped by database. PostgreSQL may report several activity states.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -292,155 +819,67 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "id": 7,
-      "gridPos": {
-        "x": 0,
-        "y": 24,
-        "w": 12,
-        "h": 8
-      }
-    },
-    {
-      "title": "Vault sealed status",
-      "description": "",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-bonny"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "vault_core_unsealed",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
           },
-          "legendFormat": "Vault unsealed",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
       "id": 8,
       "gridPos": {
-        "x": 12,
-        "y": 24,
-        "w": 12,
-        "h": 8
-      }
-    },
-    {
-      "title": "Host load",
-      "description": "",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-bonny"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "node_load1 or node_load5 or node_load15",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
-          },
-          "legendFormat": "{{__name__}}",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "id": 9,
-      "gridPos": {
         "x": 0,
-        "y": 32,
-        "w": 12,
-        "h": 8
-      }
-    },
-    {
-      "title": "Host memory",
-      "description": "",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus-bonny"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "node_memory_MemAvailable_bytes or node_memory_MemTotal_bytes",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
-          },
-          "legendFormat": "{{__name__}}",
-          "range": true
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "id": 10,
-      "gridPos": {
-        "x": 12,
-        "y": 32,
-        "w": 12,
+        "y": 39,
+        "w": 24,
         "h": 8
       }
     }
-  ]
+  ],
+  "links": [
+    {
+      "title": "Server overview",
+      "url": "/d/home-infrastructure",
+      "type": "link"
+    },
+    {
+      "title": "Containers",
+      "url": "/d/home-containers",
+      "type": "link"
+    },
+    {
+      "title": "Web traffic",
+      "url": "/d/home-nginx",
+      "type": "link"
+    }
+  ],
+  "description": "Home Server monitoring. Status cards show the latest reading; charts show trends over the selected time range. No data means the source has no matching readings."
 }

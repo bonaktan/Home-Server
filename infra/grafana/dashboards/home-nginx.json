@@ -5,17 +5,30 @@
     "home-server"
   ],
   "schemaVersion": 39,
-  "version": 1,
-  "refresh": "1m",
+  "version": 3,
+  "refresh": "30s",
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "panels": [
     {
-      "title": "Nginx exporter and server health",
-      "description": "",
-      "type": "timeseries",
+      "id": 200,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Web server and metrics collection",
+      "description": "Server health checks Nginx itself. Metrics collection checks the exporter.",
+      "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-bonny"
@@ -23,42 +36,78 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "up{job=\"nginx\"} or nginx_up",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
-          },
-          "legendFormat": "{{__name__}}",
+          "expr": "up{job=\"nginx\"}",
+          "legendFormat": "Metrics collection",
+          "range": true
+        },
+        {
+          "refId": "B",
+          "expr": "nginx_up",
+          "legendFormat": "Web server",
           "range": true
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN / SEALED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "HEALTHY",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "orientation": "auto"
       },
       "id": 1,
       "gridPos": {
         "x": 0,
-        "y": 0,
-        "w": 12,
-        "h": 8
+        "y": 1,
+        "w": 8,
+        "h": 4
       }
     },
     {
-      "title": "Connections",
-      "description": "",
-      "type": "timeseries",
+      "type": "stat",
+      "title": "Requests per second",
+      "description": "Requests handled by Nginx averaged over five minutes.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus-bonny"
@@ -66,41 +115,125 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "nginx_connections_active or nginx_connections_reading or nginx_connections_writing or nginx_connections_waiting",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus-bonny"
-          },
-          "legendFormat": "{{__name__}}",
-          "range": true
+          "expr": "sum(rate(nginx_http_requests_total[5m]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Requests per second"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "reqps",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "No data"
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         }
       },
-      "id": 2,
+      "id": 101,
       "gridPos": {
-        "x": 12,
-        "y": 0,
-        "w": 12,
-        "h": 8
+        "x": 8,
+        "y": 1,
+        "w": 8,
+        "h": 4
       }
     },
     {
-      "title": "Requests per second",
-      "description": "",
+      "type": "stat",
+      "title": "Active connections",
+      "description": "Current Nginx client connections.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(nginx_connections_active)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "Active connections"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "No data"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "textMode": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "id": 102,
+      "gridPos": {
+        "x": 16,
+        "y": 1,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "id": 201,
+      "type": "row",
+      "title": "Traffic",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Requests handled per second",
+      "description": "All requests counted by Nginx, averaged over five minutes.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -120,30 +253,53 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps"
+          "unit": "reqps",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
       "id": 3,
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 6,
         "w": 12,
         "h": 8
       }
     },
     {
-      "title": "HTTP responses by status",
-      "description": "",
+      "title": "Responses by HTTP status code",
+      "description": "2xx: success; 3xx: redirect; 4xx: client error; 5xx: server error. Based on access logs; registry access logging is disabled.",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -157,35 +313,165 @@
             "type": "loki",
             "uid": "loki-bonny"
           },
-          "queryType": "range"
+          "queryType": "range",
+          "legendFormat": "HTTP {{status}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps"
+          "unit": "reqps",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
       "id": 4,
       "gridPos": {
         "x": 12,
-        "y": 8,
+        "y": 6,
         "w": 12,
         "h": 8
       }
     },
     {
-      "title": "Request duration p95 by host",
-      "description": "",
+      "id": 202,
+      "type": "row",
+      "title": "Connections",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Current web connections",
+      "description": "Active connections include reading, writing and idle keep-alive connections.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-bonny"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nginx_connections_active",
+          "legendFormat": "Total active",
+          "range": true
+        },
+        {
+          "refId": "B",
+          "expr": "nginx_connections_reading",
+          "legendFormat": "Reading requests",
+          "range": true
+        },
+        {
+          "refId": "C",
+          "expr": "nginx_connections_writing",
+          "legendFormat": "Sending responses",
+          "range": true
+        },
+        {
+          "refId": "D",
+          "expr": "nginx_connections_waiting",
+          "legendFormat": "Idle / keep-alive",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "id": 2,
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 8
+      }
+    },
+    {
+      "id": 203,
+      "type": "row",
+      "title": "Performance",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Slow request threshold (95th percentile)",
+      "description": "95% of logged requests finished within this time, grouped by hostname. Lower is better.",
       "type": "timeseries",
       "datasource": {
         "type": "loki",
@@ -194,40 +480,77 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "quantile_over_time(0.95, {container=\"infra-nginx\"} | json | __error__=\"\" | unwrap request_time | __error__=\"\" [5m])",
+          "expr": "quantile_over_time(0.95, {container=\"infra-nginx\"} | json | __error__=\"\" | unwrap request_time | __error__=\"\" [5m]) by (host)",
           "datasource": {
             "type": "loki",
             "uid": "loki-bonny"
           },
-          "queryType": "range"
+          "queryType": "range",
+          "legendFormat": "{{host}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No data",
+          "decimals": 2,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          }
         },
         "overrides": []
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi"
+          "mode": "multi",
+          "sort": "none"
         }
       },
       "id": 5,
       "gridPos": {
         "x": 0,
-        "y": 16,
-        "w": 12,
+        "y": 24,
+        "w": 24,
         "h": 8
       }
     },
     {
-      "title": "Nginx logs",
-      "description": "",
+      "id": 204,
+      "type": "row",
+      "title": "Logs",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "title": "Web server logs",
+      "description": "Access and error logs from the Nginx container.",
       "type": "logs",
       "datasource": {
         "type": "loki",
@@ -246,7 +569,9 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No data",
+          "decimals": 2
         },
         "overrides": []
       },
@@ -261,11 +586,29 @@
       },
       "id": 6,
       "gridPos": {
-        "x": 12,
-        "y": 16,
-        "w": 12,
+        "x": 0,
+        "y": 33,
+        "w": 24,
         "h": 8
       }
     }
-  ]
+  ],
+  "links": [
+    {
+      "title": "Server overview",
+      "url": "/d/home-infrastructure",
+      "type": "link"
+    },
+    {
+      "title": "Containers",
+      "url": "/d/home-containers",
+      "type": "link"
+    },
+    {
+      "title": "Web traffic",
+      "url": "/d/home-nginx",
+      "type": "link"
+    }
+  ],
+  "description": "Home Server monitoring. Status cards show the latest reading; charts show trends over the selected time range. No data means the source has no matching readings."
 }

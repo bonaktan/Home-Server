@@ -718,6 +718,8 @@ services:
     container_name: infra-node_exporter
     command:
       - '--path.rootfs=/host'
+      - '--path.sysfs=/host/sys'
+      - '--collector.powersupplyclass'
     network_mode: host
     pid: host
     restart: always
