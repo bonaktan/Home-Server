@@ -32,6 +32,7 @@ def main():
             tls = root / "infra/vault/private/database-tls"
             policies = root / "infra/vault/policies"
             policies.symlink_to(REPO / "infra/vault/policies", target_is_directory=True)
+            (root / "infra/vault/database").symlink_to(SOURCE, target_is_directory=True)
             config.ROOT = root
 
             def start(service, image, *args):
@@ -50,7 +51,7 @@ def main():
             names = {}
             for service, image, environment in [
                 ("postgresql", "postgres:18-alpine", ["-e", "POSTGRES_PASSWORD=test-only", "-e", "POSTGRES_DB=postgres"]),
-                ("mariadb", "mariadb:11", ["-e", "MYSQL_ROOT_PASSWORD=test-only"]),
+                ("mariadb", "mariadb:11", ["-e", "MYSQL_ROOT_PASSWORD=test-only", "-e", "MYSQL_DATABASE=mariadb"]),
             ]:
                 names[service] = start(service, image, *environment,
                     "--tmpfs", "/var/lib/postgresql" if service == "postgresql" else "/var/lib/mysql",
@@ -66,7 +67,7 @@ def main():
                 if database == "postgresql":
                     command = ["psql", "-XAtq", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1"]
                 else:
-                    command = ["mariadb", "-h127.0.0.1", "-uroot", "-ptest-only", "--batch", "--skip-column-names"]
+                    command = ["mariadb", "-h127.0.0.1", "-uroot", "-ptest-only", "-Dmariadb", "--batch", "--skip-column-names"]
                 result = run("docker", "exec", "-i", "-e", "PGPASSWORD=test-only", names[database], *command, input=statement, check=False)
                 if result.returncode:
                     raise AssertionError(f"{database}: {result.stderr}")
@@ -124,7 +125,11 @@ def main():
                     application_db = "itskolar_system" if role.startswith("itskolar") else "skybridge_airways" if role.startswith("skybridge") else "postgres"
                     connection = ["docker", "exec", "-e", f"PGPASSWORD={password}", names[database],
                                   "psql", "-XAtq", f"host=postgresql user={username} dbname={application_db} sslmode=verify-full sslrootcert=/test-ca.pem", "-c", "SELECT current_user;"]
-                    assert run(*connection).stdout.strip() == (config.PG_ROLES[role][0] if role.endswith("-admin") else username)
+                    stable_owner = role.endswith("-admin") or role == "postgresql-migration"
+                    assert run(*connection).stdout.strip() == (config.PG_ROLES[role][0] if stable_owner else username)
+                    if role == "postgresql-migration":
+                        run(*connection[:-2], "-c", "CREATE TABLE public.migration_owner_probe(id integer); ALTER TABLE public.migration_owner_probe ADD COLUMN label text;")
+                        assert sql(database, "SELECT tableowner FROM pg_tables WHERE schemaname='public' AND tablename='migration_owner_probe';").strip() == 'vault_postgresql_migration'
                     assert sql(database, f"SELECT rolsuper OR rolcreaterole FROM pg_roles WHERE rolname='{username}';").strip() == "f"
                 else:
                     connection = ["docker", "exec", "-e", f"MYSQL_PWD={password}", names[database],
@@ -133,6 +138,9 @@ def main():
                     if role == "pterodactyl":
                         denied = run(*connection[:-2], "-e", "CREATE DATABASE forbidden;", check=False)
                         assert denied.returncode != 0
+                    if role == "mariadb-migration":
+                        run(*connection[:-2], "-e", "CREATE TABLE mariadb.migration_probe(id integer); ALTER TABLE mariadb.migration_probe ADD COLUMN label TEXT; DROP TABLE mariadb.migration_probe;")
+                        assert run(*connection[:-2], "-e", "CREATE TABLE panel.migration_forbidden(id integer);", check=False).returncode != 0
                 vault.request("sys/leases/revoke", {"lease_id": credentials["lease_id"]})
                 assert run(*connection, check=False).returncode != 0, f"{role} survived revocation"
                 print(f"PASS: {role}: TLS login, ACL isolation, revocation")

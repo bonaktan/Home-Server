@@ -21,11 +21,13 @@ logins. Enrollment generates random passwords in memory, sends them through
 the local database socket and Vault's verified HTTPS API, then immediately
 rotates them through Vault. Reruns preserve Vault's stored management passwords.
 
-PostgreSQL's manager has CREATEROLE and ADMIN OPTION on only the five service
+PostgreSQL's manager has CREATEROLE and ADMIN OPTION on the five service
 roles, without inheriting them. MariaDB's manager needs CREATE USER plus grant
 authority for `panel.*` and exporter monitoring privileges. MariaDB's exporter
 requires global SELECT; this identity can read application data and must be
 treated as privileged. Neither application nor exporter gets GRANT OPTION.
+Migration enrollment adds a sixth PostgreSQL group and MariaDB grant authority
+on the configured infrastructure catalog, for the two dedicated Flyway identities.
 
 ## Policies and roles
 
@@ -42,6 +44,13 @@ It grants no database configuration, policy administration or other-service acce
 | `postgresql-exporter` | `database/creds/postgresql-exporter` | `pg_monitor` |
 | `pterodactyl` | `database/creds/pterodactyl` | All privileges on `panel.*` |
 | `mariadb-exporter` | `database/creds/mariadb-exporter` | SELECT, PROCESS, REPLICATION CLIENT, SLAVE MONITOR; 3 connections |
+| `postgresql-migration` | `database/creds/postgresql-migration` | Stable schema owner in `POSTGRES_DB`; 5 connections |
+| `mariadb-migration` | `database/creds/mariadb-migration` | All privileges on `MARIADB_DB` only; 5 connections |
+
+For an existing production deployment, follow [Flyway with dynamic credentials](DYNAMIC_MIGRATIONS.md)
+to add the two identities through the Vault UI and run migrations. Ordinary
+`docker compose up` excludes migration jobs; use `migrate.py` explicitly before
+deploying changes that require them. No custom Flyway image is built.
 
 The four application role names are retained to preserve existing grants and
 object ownership. V2 grants CONNECT to their databases. It does not replay the
@@ -52,6 +61,7 @@ objects owned by an expiring username. Do not RESET ROLE before creating objects
 Workers cannot create objects unless the existing role's grants allow it.
 
 ## Bootstrap and verify
+
 
 Run from the repository root. Keep the same `COMPOSE_FILE` selection for all
 commands and future deployments:
@@ -72,11 +82,14 @@ export COMPOSE_FILE=compose.yaml:compose.production.yaml
 sh infra/vault/database/generate-tls.sh
 docker compose up -d postgresql mariadb vault
 # Initialize/unseal Vault using the existing operations instructions if needed.
-docker compose run --rm postgresql_migration
-docker compose run --rm mariadb_migration
+# Fresh databases only: V1/V2 require administrator provisioning permissions.
+docker compose run --rm postgresql_bootstrap_migration
+docker compose run --rm mariadb_bootstrap_migration
 
 export VAULT_ADDR=https://vault.internal.bonnybonnybonaktan.xyz
 python3 infra/vault/database/configure.py
+python3 infra/vault/database/migrate.py postgresql
+python3 infra/vault/database/migrate.py mariadb
 docker compose up -d --build postgresql_exporter mariadb_exporter pterodactyl
 ```
 
@@ -109,7 +122,7 @@ is not used for staging Wings. Keep the generated node token private.
 
 The script prompts privately for a Vault administrator token. It needs permission
 to enable the database engine and AppRole auth, configure/rotate the two database
-connections, and write the seven roles and policies. This token is never mounted
+connections, and write the nine roles and policies. This token is never mounted
 into a workload. Run enrollment on the Docker host where the repository and
 Compose project live, with the same environment/project selection as deployment.
 Only use this bootstrap on a `database/` mount owned by this repository; existing
@@ -155,11 +168,17 @@ requests. Database revocation prevents new logins; it does not terminate already
 authenticated sessions. Drain/restart all consumers when revoking a compromised lease.
 
 AppRole tokens are renewable with a 1h period and have no default policy. Secret
-IDs expire in 30 days and allow reauthentication after a process/container restart.
-Rerun enrollment at least monthly and securely deliver replacement IDs to external
-deployments. Old Secret IDs remain valid until expiry; revoke them through AppRole's
-secret-id-accessor API immediately if compromised. AppRole is a bootstrap identity;
-its Secret ID still needs secure delivery, even though database passwords are dynamic.
+IDs do not expire and permit unlimited authentications, including after a process
+or container restart. They are long-lived bootstrap credentials: protect their
+files and revoke/replace them if compromised or when retiring a deployment.
+Issuing a new SecretID does not revoke older IDs. Use AppRole's secret-id-accessor
+API to revoke IDs that are no longer needed.
+
+Changing an AppRole's default TTL does not remove the expiry from existing IDs.
+For roles created with the previous 30-day setting, follow the
+[web UI migration instructions](WEB_UI_SETUP.md#existing-approles-change-to-non-expiring-secretids)
+to change the default, issue replacement IDs and install them. The RoleIDs stay
+the same. Database credentials remain dynamic with their original 1h/24h TTLs.
 
 ## Disable the old logins
 
@@ -175,10 +194,10 @@ secrets and the panel's persisted `.env`, and ensure no cached Laravel database
 configuration remains. The panel wrapper clears its config cache before starting.
 Do not delete its APP_KEY or other application settings.
 
-Database initialization and infrastructure Flyway jobs retain the emergency
-administrator credentials from `.env`. Those are provisioning identities, not
-runtime service identities, and are intentionally outside dynamic application
-leasing. Remove `.env` access from application containers. CloudBeaver is an interactive
+Database initialization and the explicit `*_bootstrap_migration` jobs retain the
+emergency administrator credentials from `.env`. Regular Flyway jobs use dedicated
+Vault leases through `migrate.py`; privileged provisioning SQL still needs a
+reviewed administrator operation. Remove `.env` access from application containers. CloudBeaver is an interactive
 tool: users obtain their own scoped credentials rather than a shared superuser login.
 Services without database access need no database ACL policy.
 
@@ -194,6 +213,7 @@ until all dynamic sessions have drained. Never drop the stable PostgreSQL roles.
 docker compose -f compose.yaml -f compose.production.yaml config --quiet
 docker compose -f compose.yaml -f compose.staging.yaml config --quiet
 python3 infra/vault/database/tests/integration.py
+python3 -m unittest discover -s infra/vault/database/tests -p test_migrate.py -v
 ```
 
 The integration check creates disposable containers/network, loads both Flyway
@@ -210,7 +230,7 @@ docker compose -f compose.yaml -f compose.staging.yaml ps -a
 ```
 
 These commands pin `compose.yaml` and `compose.staging.yaml`. Credential checks
-exercise all seven real AppRoles, token/lease renewal, ACL denial, verified TLS,
+exercise all nine real AppRoles after enrollment, token/lease renewal, ACL denial, verified TLS,
 incorrect-password rejection, and revocation. Rotation temporarily sets the panel
 and exporters to 60s initial / 120s maximum leases and restarts them, verifies
 replacement usernames with successful exporter scrapes and panel HTTP/database

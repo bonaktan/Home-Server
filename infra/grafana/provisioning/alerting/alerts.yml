@@ -1,0 +1,425 @@
+apiVersion: 1
+groups:
+- orgId: 1
+  name: Home Server
+  folder: Home Server
+  interval: 1m
+  rules:
+  - uid: target-down
+    title: Prometheus target down
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: up == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: A monitored Prometheus target cannot be scraped.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: node-cpu
+    title: Host CPU high
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: 1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.90
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 10m
+    annotations:
+      summary: Host CPU has been above 90%.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: node-memory
+    title: Host memory high
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: 1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes > 0.90
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 10m
+    annotations:
+      summary: Host memory usage has been above 90%.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: disk-space
+    title: Filesystem almost full
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/host.*"}
+          / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/host.*"}
+          < 0.10
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 10m
+    annotations:
+      summary: Filesystem has less than 10% available.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: container-memory
+    title: Container memory near limit
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: container_memory_working_set_bytes{name!=""} / (container_spec_memory_limit_bytes{name!=""}
+          > 0 and container_spec_memory_limit_bytes{name!=""} < 1e15) > 0.90
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 10m
+    annotations:
+      summary: Container working set exceeds 90% of its configured memory limit.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: database-down
+    title: Database unavailable
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: pg_up == 0 or mysql_up == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: A database exporter cannot reach its database.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: vault-sealed
+    title: Vault sealed
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: vault_core_unsealed == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: Vault reports that it is sealed.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: nginx-down
+    title: Nginx unavailable
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: prometheus-bonny
+      model:
+        refId: A
+        expr: nginx_up == 0
+        instant: true
+        range: false
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 2m
+    annotations:
+      summary: The Nginx exporter cannot reach Nginx.
+    labels:
+      severity: warning
+    isPaused: false
+  - uid: nginx-5xx
+    title: Nginx elevated 5xx rate
+    condition: B
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 600
+        to: 0
+      datasourceUid: loki-bonny
+      model:
+        refId: A
+        expr: sum(rate({container="infra-nginx"} | json | __error__="" | status=~"5.."
+          [5m])) / sum(rate({container="infra-nginx"} | json | __error__="" | status=~"[1-5].."
+          [5m])) > 0.05
+        queryType: instant
+        intervalMs: 1000
+        maxDataPoints: 43200
+    - refId: B
+      relativeTimeRange:
+        from: 0
+        to: 0
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: classic_conditions
+        conditions:
+        - type: query
+          query:
+            params:
+            - A
+          reducer:
+            type: last
+            params: []
+          evaluator:
+            type: gt
+            params:
+            - -1
+          operator:
+            type: and
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    annotations:
+      summary: More than 5% of Nginx requests returned HTTP 5xx.
+    labels:
+      severity: warning
+    isPaused: false

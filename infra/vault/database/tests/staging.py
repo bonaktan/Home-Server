@@ -45,7 +45,7 @@ class StagingVault:
 def sql(database, statement):
     commands = {
         "postgresql": 'exec psql -XAtq -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1',
-        "mariadb": 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mariadb --protocol=socket -uroot --batch --skip-column-names',
+        "mariadb": 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mariadb --protocol=socket -uroot --database="$MYSQL_DATABASE" --batch --skip-column-names',
     }
     result = compose("exec", "-T", database, "sh", "-ec", commands[database], stdin=statement)
     if result.returncode:
@@ -73,8 +73,8 @@ def check_credentials(vault):
             username, password = credentials["data"]["username"], credentials["data"]["password"]
             if settings["db_name"] == "postgresql":
                 database = "itskolar_system" if role.startswith("itskolar") else "skybridge_airways" if role.startswith("skybridge") else "postgres"
-                # Use the configured infrastructure database for its exporter.
-                if role == "postgresql-exporter":
+                # These identities use the configured infrastructure catalog.
+                if role in ("postgresql-exporter", "postgresql-migration"):
                     database = sql("postgresql", "SELECT current_database();").strip()
                 args = ["exec", "-T", "-e", "PGPASSWORD", "postgresql", "psql", "-XAtq",
                         f"host=postgresql dbname={database} user={username} sslmode=verify-full sslrootcert=/test-ca.pem",

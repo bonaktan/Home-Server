@@ -16,6 +16,8 @@ networks:
     driver: bridge
   database_observability:
     driver: bridge
+  nginx_observability:
+    driver: bridge
 
   vault_database:
     internal: true
@@ -133,6 +135,7 @@ services:
       - shared_infra_net
       - pterodactyl
       - vault_proxy
+      - nginx_observability
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:
@@ -227,17 +230,20 @@ services:
         reservations: {cpus: "0.1", memory: 256M}
     restart: always
 
-  postgresql_migration:
+  postgresql_migration: &postgresql_migration
+    profiles: [migrations]
     image: flyway/flyway:10
     container_name: infra-postgresql_migration
     command: migrate
     volumes:
-      - ./infra/migration/postgresql:/flyway/sql
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgresql:5432/${POSTGRES_DB}
-      FLYWAY_USER: ${POSTGRES_USER}
-      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+      - ./infra/migration/postgresql:/flyway/sql:ro
+      - ./infra/vault/private/database-tls/ca.pem:/flyway/database-ca.pem:ro
+      - ./infra/vault/database/flyway-entrypoint.sh:/flyway/entrypoint.sh:ro
+    entrypoint: [sh, /flyway/entrypoint.sh]
+    environment: &postgresql_migration_environment
+      FLYWAY_URL: jdbc:postgresql://postgresql:5432/${POSTGRES_DB}?sslmode=verify-full&sslrootcert=/flyway/database-ca.pem
       FLYWAY_MIXED: "true"
+      FLYWAY_CLEAN_DISABLED: "true"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -254,6 +260,15 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-postgresql_migration"
+
+  postgresql_bootstrap_migration:
+    <<: *postgresql_migration
+    container_name: infra-postgresql_bootstrap_migration
+    profiles: [bootstrap]
+    environment:
+      <<: *postgresql_migration_environment
+      FLYWAY_USER: ${POSTGRES_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
 
   postgresql_exporter:
     image: home-server/postgresql-exporter-vault:local
@@ -336,17 +351,20 @@ services:
       - sh
       - /etc/database-tls-entrypoint.sh
 
-  mariadb_migration:
+  mariadb_migration: &mariadb_migration
+    profiles: [migrations]
     image: flyway/flyway:10
     container_name: infra-mariadb_migration
     command: migrate
     volumes:
-      - ./infra/migration/mariadb:/flyway/sql
-    environment:
-      FLYWAY_URL: jdbc:mariadb://mariadb:3306/${MARIADB_DB}
-      FLYWAY_USER: root
-      FLYWAY_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      - ./infra/migration/mariadb:/flyway/sql:ro
+      - ./infra/vault/private/database-tls/ca.pem:/flyway/database-ca.pem:ro
+      - ./infra/vault/database/flyway-entrypoint.sh:/flyway/entrypoint.sh:ro
+    entrypoint: [sh, /flyway/entrypoint.sh]
+    environment: &mariadb_migration_environment
+      FLYWAY_URL: jdbc:mariadb://mariadb:3306/${MARIADB_DB}?sslMode=verify-full&serverSslCert=/flyway/database-ca.pem
       FLYWAY_MIXED: "true"
+      FLYWAY_CLEAN_DISABLED: "true"
     networks:
       - shared_infra_database
     depends_on:
@@ -363,6 +381,15 @@ services:
         max-size: "10m"
         max-file: "3"
         labels: "service=infra-postgresql_migration"
+
+  mariadb_bootstrap_migration:
+    <<: *mariadb_migration
+    container_name: infra-mariadb_bootstrap_migration
+    profiles: [bootstrap]
+    environment:
+      <<: *mariadb_migration_environment
+      FLYWAY_USER: root
+      FLYWAY_PASSWORD: ${MARIADB_ROOT_PASSWORD}
 
   mariadb_exporter:
     image: home-server/mariadb-exporter-vault:local
@@ -639,6 +666,19 @@ services:
   ##################################################################
   # Observability Stack
   ##################################################################
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.2
+    container_name: infra-nginx_exporter
+    command: ["--nginx.scrape-uri=http://nginx:8081/stub_status"]
+    networks:
+      - nginx_observability
+      - infra_services
+    deploy:
+      resources:
+        limits: {cpus: "0.25", memory: 64M}
+        reservations: {cpus: "0.1", memory: 32M}
+    restart: always
+
   prometheus:
     image: prom/prometheus:latest
     container_name: infra-prometheus
@@ -798,6 +838,7 @@ services:
     volumes:
       - observ-grafana-data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - infra_services
       - shared_infra_net

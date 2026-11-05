@@ -44,7 +44,7 @@ Nginx (reverse proxy, TLS termination)
    └── pihole.internal.bonnybonnybonaktan.xyz  → Pi-hole Web UI
 
 PostgreSQL (shared DB, isolated network)
-   └── Flyway (schema migrations, runs on startup)
+   └── Flyway (explicit schema migrations using Vault leases)
 
 Pi-hole (host network, DNS resolver for the LAN)
 ```
@@ -130,7 +130,7 @@ Health check runs `pg_isready` every 10 seconds; dependent services wait for a h
 | Networks | `shared_infra_net`, `shared_infra_database` |
 | URL | `https://pgadmin.internal.bonnybonnybonaktan.xyz` |
 
-Web-based PostgreSQL and MariaDB administration UI. Complete the administrator setup on first access. Both connection definitions use certificate and hostname verification with the database CA. Enter authorized database credentials in CloudBeaver; no database passwords are shipped in the definitions. PostgreSQL starts with the `postgres` database selected. The shared connection definitions are mounted read-only from `infra/cloudbeaver/data-sources.json`; edit that file to change them. Other workspace data persists in `cloudbeaver-data`.
+Web-based PostgreSQL and MariaDB administration UI. Complete the administrator setup on first access. Both connection definitions use certificate and hostname verification with the database CA. Enter authorized database credentials in CloudBeaver; no database passwords are shipped in the definitions. PostgreSQL starts with the `postgres` database selected. The shared connection definitions are mounted from `infra/cloudbeaver/data-sources.json` and changes in CloudBeaver update that file. The container user must have write permission on it. Other workspace data persists in `cloudbeaver-data`.
 
 ---
 
@@ -139,11 +139,18 @@ Web-based PostgreSQL and MariaDB administration UI. Complete the administrator s
 | Property | Value |
 |---|---|
 | Image | `flyway/flyway:10` |
-| Container | `infra-database_migration` |
+| Services | `postgresql_migration`, `mariadb_migration` |
 | Network | `shared_infra_database` |
-| SQL Path | `./infra/migration/sql` |
+| SQL Paths | `./infra/migration/postgresql`, `./infra/migration/mariadb` |
 
-Runs once on startup (`migrate` command) to apply versioned SQL migrations. Depends on the database health check. Connects via JDBC to `database:5432`.
+Run explicitly before deployment with `python3 infra/vault/database/migrate.py postgresql`
+and the equivalent `mariadb` command, with `COMPOSE_FILE` set to the selected base
+and environment files. The helper uses dedicated AppRoles to obtain, renew and
+revoke database credentials. JDBC connections verify TLS certificates and hostnames.
+The official Flyway image is unchanged; the jobs are excluded from ordinary `up`
+by the `migrations` profile. Fresh V1/V2 provisioning requires the separate
+`*_bootstrap_migration` administrator jobs. See the
+[production setup guide](infra/vault/database/DYNAMIC_MIGRATIONS.md).
 
 ---
 
@@ -301,7 +308,7 @@ CloudBeaver is limited to 1 CPU and 768 MB of memory.
 | `database-data` | `/var/lib/postgresql` | database | PostgreSQL data files |
 | `cloudbeaver-data` | `/opt/cloudbeaver/workspace` | cloudbeaver | Users, settings, and saved connections |
 | `./infra/pihole` | `/etc/pihole` | pihole | Pi-hole config & blocklists |
-| `./infra/migration/sql` | `/flyway/sql` | flyway | SQL migration scripts |
+| `./infra/migration/{postgresql,mariadb}` | `/flyway/sql` | matching Flyway job | Read-only SQL migration scripts |
 | `./infra/registry/auth` | `/auth` | registry | htpasswd auth file |
 | `./infra/registry/config.yml` | `/etc/docker/registry/config.yml` | registry | Registry config |
 | `./infra/nginx/` | `/etc/nginx/` | nginx | Nginx config & vhosts |
@@ -314,11 +321,13 @@ CloudBeaver is limited to 1 CPU and 768 MB of memory.
 | Variable | Used By | Description |
 |---|---|---|
 | `CLOUDFLARED_TOKEN` | cloudflared | Cloudflare tunnel token |
-| `POSTGRES_USER` | database, flyway | DB superuser username |
-| `POSTGRES_PASSWORD` | database, flyway | DB superuser password |
+| `POSTGRES_USER` | postgresql, administrator bootstrap job | DB superuser username |
+| `POSTGRES_PASSWORD` | postgresql, administrator bootstrap job | Initial DB superuser password; existing volumes retain the stored value |
 | `POSTGRES_DB` | database, flyway | Default database name |
 
-All secrets are expected in a `.env` file at the project root (loaded automatically by Docker Compose).
+Compose reads bootstrap settings from `.env` at the project root. Runtime database
+credentials and regular Flyway credentials come from Vault; AppRole identity files
+remain in the ignored `infra/vault/private` directory.
 
 ---
 

@@ -17,10 +17,11 @@ PG_ROLES = {
     "skybridge-admin": ("Skybridge-Airways_Admin", "5min", -1),
     "skybridge-worker": ("Skybridge-Airways_Worker", "30s", 20),
     "postgresql-exporter": ("vault_postgresql_exporter", "30s", 5),
+    "postgresql-migration": ("vault_postgresql_migration", "30min", 5),
 }
 
 
-def database_roles():
+def database_roles(mariadb_database="mariadb"):
     roles = {}
     for name, (group, timeout, limit) in PG_ROLES.items():
         create = (
@@ -31,7 +32,7 @@ def database_roles():
             f'ALTER ROLE "{{{{name}}}}" SET statement_timeout = \'{timeout}\'; '
             'ALTER ROLE "{{name}}" SET idle_in_transaction_session_timeout = \'60s\';'
         )
-        if name.endswith("-admin"):
+        if name.endswith("-admin") or name == "postgresql-migration":
             # DDL must be owned by the stable group, not a leased login.
             create += f' ALTER ROLE "{{{{name}}}}" SET role = \'{group}\';'
         roles[name] = {
@@ -42,6 +43,7 @@ def database_roles():
     for name, grants, limit in [
         ("pterodactyl", "GRANT ALL PRIVILEGES ON panel.* TO '{{name}}'@'%';", 30),
         ("mariadb-exporter", "GRANT SELECT, PROCESS, REPLICATION CLIENT, SLAVE MONITOR ON *.* TO '{{name}}'@'%';", 3),
+        ("mariadb-migration", "GRANT ALL PRIVILEGES ON `" + mariadb_database.replace("`", "``") + "`.* TO '{{name}}'@'%';", 5),
     ]:
         roles[name] = {
             "db_name": "mariadb",
@@ -56,12 +58,12 @@ def database_roles():
 
 
 class Vault:
-    def __init__(self):
+    def __init__(self, token=None):
         self.address = os.environ.get("VAULT_ADDR", "https://vault.internal.bonnybonnybonaktan.xyz").rstrip("/")
         if not self.address.startswith("https://"):
             raise ValueError("VAULT_ADDR must use HTTPS")
         self.context = ssl.create_default_context(cafile=os.environ.get("VAULT_CACERT"))
-        self.token = os.environ.get("VAULT_TOKEN") or getpass.getpass("Vault administrator token: ")
+        self.token = token if token is not None else os.environ.get("VAULT_TOKEN") or getpass.getpass("Vault administrator token: ")
 
     def request(self, path, data=None, missing_ok=False):
         request = urllib.request.Request(
@@ -83,7 +85,7 @@ class Vault:
 def database_sql(database, sql):
     commands = {
         "postgresql": 'exec psql -X -A -t -q -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1',
-        "mariadb": 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mariadb --protocol=socket -uroot',
+        "mariadb": 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mariadb --protocol=socket -uroot --database="$MYSQL_DATABASE" --batch --skip-column-names',
     }
     result = subprocess.run(
         ["docker", "compose", "exec", "-T", database, "sh", "-ec", commands[database]],
@@ -95,7 +97,12 @@ def database_sql(database, sql):
 
 
 def configure(vault):
-    roles = database_roles()
+    for database in ("postgresql", "mariadb"):
+        database_sql(database, (ROOT / f"infra/vault/database/bootstrap-{database}-migration.sql").read_text())
+    mariadb_database = database_sql("mariadb", "SELECT DATABASE();").strip()
+    if not mariadb_database or mariadb_database == "NULL":
+        raise ValueError("Select MARIADB_DB before enrolling migration credentials")
+    roles = database_roles(mariadb_database)
     mounts = vault.request("sys/mounts")["data"]
     if "database/" not in mounts:
         vault.request("sys/mounts/database", {"type": "database"})
@@ -104,7 +111,8 @@ def configure(vault):
 
     for database in ("postgresql", "mariadb"):
         config_path = f"database/config/{database}"
-        if vault.request(config_path, missing_ok=True) is None:
+        existing = vault.request(config_path, missing_ok=True)
+        if existing is None:
             password = secrets.token_hex(32)
             if database == "postgresql":
                 database_sql(database, f"ALTER ROLE vault_manager LOGIN PASSWORD '{password}';")
@@ -130,6 +138,15 @@ def configure(vault):
                 "username_template": 'v_{{random 24}}', "verify_connection": True,
             })
             vault.request(config_path, config)
+        else:
+            allowed = existing["data"]["allowed_roles"]
+            desired = [name for name, role in roles.items() if role["db_name"] == database]
+            if "*" not in allowed and not set(desired).issubset(allowed):
+                # A partial update retains the management password already owned by Vault.
+                vault.request(config_path, {
+                    "plugin_name": existing["data"]["plugin_name"],
+                    "allowed_roles": sorted(set(allowed) | set(desired)),
+                })
         # Safe on reruns: never overwrite the password Vault already owns.
         vault.request(f"database/rotate-root/{database}", {})
 
@@ -151,7 +168,7 @@ def configure(vault):
         vault.request(f"auth/approle/role/{name}", {
             "token_policies": [name], "token_no_default_policy": True,
             "token_period": "1h", "token_num_uses": 0,
-            "secret_id_ttl": "720h", "secret_id_num_uses": 0,
+            "secret_id_ttl": 0, "secret_id_num_uses": 0,
         })
         directory = private / name
         directory.mkdir(exist_ok=True, mode=0o755)

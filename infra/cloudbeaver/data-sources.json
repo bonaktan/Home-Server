@@ -5,7 +5,7 @@
       "provider": "postgresql",
       "driver": "postgres-jdbc",
       "name": "PostgreSQL",
-      "save-password": false,
+      "save-password": true,
       "configuration": {
         "host": "postgresql",
         "port": "5432",
@@ -18,7 +18,7 @@
       "provider": "mysql",
       "driver": "mariaDB",
       "name": "MariaDB",
-      "save-password": false,
+      "save-password": true,
       "configuration": {
         "host": "mariadb",
         "port": "3306",
